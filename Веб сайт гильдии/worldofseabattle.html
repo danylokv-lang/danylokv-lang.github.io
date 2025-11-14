@@ -1,0 +1,2221 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World of Sea Battle | Фан-сайт Гильдии</title>
+    <!-- Подключение Vanilla-Tilt.js для 3D эффекта -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <!-- Подключение Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        /* Настройка шрифта и цветов для "бело-золотистого" акцента */
+        :root {
+            --color-primary-dark: #0A1931; /* Темно-синий основной фон */
+            --color-secondary-dark: #1F304B; /* Темно-синий фон для карточек */
+            --color-accent-gold: #FFD700; /* Золотой акцент */
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+            background: radial-gradient(1200px 800px at 50% -200px, rgba(255, 215, 0, 0.06), transparent 60%), var(--color-primary-dark);
+        }
+
+        /* Доп. стили UI */
+        .gold-button {
+            background: linear-gradient(180deg, #FFD700, #E6C200);
+            color: #1a1a1a;
+            border: 1px solid rgba(255, 215, 0, 0.5);
+        }
+        .gold-button:hover {
+            filter: brightness(1.05);
+        }
+        .gold-border { border-color: var(--color-accent-gold); }
+
+        #content-container.is-exiting { opacity: 0.25; transition: opacity .3s ease; }
+
+        /* Парящие иконки на фоне */
+        #skulls-container { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+        .skull {
+            position: absolute;
+            top: -10vh;
+            animation-name: float-down;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+            color: rgba(255,255,255,0.18);
+            text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+        @keyframes float-down {
+            0% { transform: translateY(-10vh); opacity: .8; }
+            100% { transform: translateY(110vh); opacity: .2; }
+        }
+
+        /* Размеры изображений: уменьшенные превью и детали на сайте */
+        #pvp-builds summary img[data-num] { max-height: 6rem !important; }
+        .pvp-img-single { max-height: 40vh !important; }
+        .guide-photo-single { max-height: 50vh !important; }
+        img.tactics-thumb { height: 10rem !important; }
+        #pb-gallery img { height: 6rem !important; }
+                /* Новогодняя тема */
+                body.holiday-active header { 
+                        background: linear-gradient(180deg, rgba(8,34,58,0.9), rgba(15,23,42,0.7));
+                        box-shadow: 0 2px 20px rgba(255,255,255,0.06);
+                }
+                body.holiday-active .text-yellow-300 { text-shadow: 0 0 8px rgba(255,255,255,0.35); }
+                #garland {
+                        position: fixed; top: 0; left: 0; right: 0; height: 32px; z-index: 30; pointer-events: none; display: none;
+                        background:
+                            radial-gradient(circle at 20px 16px, #ff5a5a 6px, transparent 7px) 0 0/80px 32px repeat-x,
+                            radial-gradient(circle at 60px 16px, #4dc9ff 6px, transparent 7px) 0 0/80px 32px repeat-x,
+                            radial-gradient(circle at 40px 16px, #ffd966 6px, transparent 7px) 0 0/80px 32px repeat-x;
+                        filter: drop-shadow(0 0 6px rgba(255,255,255,0.6));
+                        animation: twinkle 2s ease-in-out infinite alternate;
+                        opacity: .9;
+                }
+                body.holiday-active #garland { display: block; }
+                @keyframes twinkle { 0% { filter: brightness(.85); } 100% { filter: brightness(1.15); } }
+
+                #snow-overlay { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 25; display: none; }
+                body.holiday-active #snow-overlay { display: block; }
+                .snowflake { position: absolute; top: -10px; color: #fff; opacity: .9; will-change: transform, opacity; animation-name: fall, sway; animation-iteration-count: infinite; }
+                @keyframes fall { to { transform: translateY(110vh); } }
+                @keyframes sway { 0% { margin-left: -10px; } 50% { margin-left: 10px; } }
+
+                /* Снежные сугробы на элементах */
+                .snow-cap { position: relative; overflow: visible; }
+                .snow-cap::before {
+                    content: "";
+                    position: absolute; left: 8px; right: 8px; top: -6px; height: 10px;
+                    background: #fff;
+                    border-radius: 8px 8px 12px 12px;
+                    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+                    z-index: 2;
+                }
+
+                /* Боковые украшения (снеговики) */
+                #holiday-left, #holiday-right {
+                    position: fixed; bottom: 16px; z-index: 20; pointer-events: none; display: none;
+                    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.35));
+                    font-size: clamp(40px, 6vw, 80px);
+                }
+                #holiday-left { left: 8px; }
+                #holiday-right { right: 8px; }
+                body.holiday-active #holiday-left, body.holiday-active #holiday-right { display: block; }
+
+                /* Нижний снежный слой (земля) */
+                #snow-ground {
+                    position: fixed; left: 0; right: 0; bottom: 0; height: 60px; z-index: 18; pointer-events: none; display: none;
+                    background:
+                      radial-gradient(100px 28px at 10% 100%, #fff 60%, transparent 61%),
+                      radial-gradient(120px 32px at 35% 100%, #fff 60%, transparent 61%),
+                      radial-gradient(140px 36px at 65% 100%, #fff 60%, transparent 61%),
+                      radial-gradient(100px 28px at 90% 100%, #fff 60%, transparent 61%),
+                      linear-gradient(#fff,#fff);
+                }
+                @media (min-width: 640px) { #snow-ground { height: 72px; } }
+                body.holiday-active #snow-ground { display: block; }
+
+                /* Новогодний отсчет */
+                #ny-countdown { position: fixed; top: 56px; right: 12px; z-index: 40; display: none; }
+                #ny-countdown .panel {
+                    backdrop-filter: blur(6px);
+                    background: rgba(15,23,42,0.7);
+                    border: 1px solid rgba(255,255,255,0.18);
+                    color: #e5e7eb; padding: 6px 10px; border-radius: 10px;
+                    box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+                    display: flex; align-items: center; gap: 8px;
+                }
+                #ny-countdown button { pointer-events: auto; }
+                body.holiday-active #ny-countdown { display: block; }
+
+                /* Подарки у земли */
+                #holiday-gifts { position: fixed; left: 0; right: 0; bottom: 60px; z-index: 19; pointer-events: none; display: none; height: 0; }
+                .gift { position: absolute; bottom: 0; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.35)); font-size: clamp(18px, 3vw, 34px); }
+                body.holiday-active #holiday-gifts { display: block; }
+
+                /* Снег внутри секций (для вкладки Гайды) */
+                #guide-content { position: relative; }
+                .section-snow { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 1; }
+                .section-snow .flake { position: absolute; top: -10px; color: #fff; opacity: .85; animation-name: fall, sway; animation-iteration-count: infinite; }
+    </style>
+    </head>
+    <body class="min-h-screen text-gray-100">
+        <!-- Фоновые иконки -->
+        <div id="skulls-container" aria-hidden="true"></div>
+        <!-- Новогодний декор (отображается при активной теме) -->
+        <div id="garland" aria-hidden="true"></div>
+        <div id="snow-overlay" aria-hidden="true"></div>
+        <div id="holiday-left" aria-hidden="true">⛄</div>
+        <div id="holiday-right" aria-hidden="true">⛄</div>
+        <div id="holiday-gifts" aria-hidden="true"></div>
+        <div id="snow-ground" aria-hidden="true"></div>
+        <div id="ny-countdown"><div class="panel">
+            <span>До Нового года:</span>
+            <span id="ny-countdown-text">--:--:--:--</span>
+            <button id="ny-close" class="px-2 py-0.5 rounded border border-gray-500 text-xs hover:border-yellow-400" title="Скрыть">×</button>
+        </div></div>
+
+        <!-- Приложение -->
+        <div id="app" class="relative z-10">
+            <header class="sticky top-0 z-20 backdrop-blur bg-slate-900/70 border-b border-gray-700">
+                <nav class="max-w-6xl mx-auto flex items-center justify-between p-3">
+                    <div class="font-extrabold text-xl" style="color: var(--color-accent-gold);">⚓ Sea Battle Guild</div>
+                    <div class="flex gap-2 text-sm">
+                        <button class="py-1.5 px-3 rounded border border-gray-600 hover:border-yellow-400" onclick="navigate('main')">Главная</button>
+                        <button class="py-1.5 px-3 rounded border border-gray-600 hover:border-yellow-400" onclick="navigate('guides')">Гайды</button>
+                        <button class="py-1.5 px-3 rounded border border-gray-600 hover:border-yellow-400" onclick="navigate('map')">Карта</button>
+                        <button class="py-1.5 px-3 rounded border border-gray-600 hover:border-yellow-400" onclick="navigate('craft')">Калькулятор</button>
+                        <button class="py-1.5 px-3 rounded border border-gray-600 hover:border-yellow-400" onclick="navigate('guild')">Гильдия</button>
+                        <button id="missions-link" class="py-1.5 px-3 rounded border border-gray-600 hover:border-yellow-400 hidden" onclick="navigate('missions')">Миссии</button>
+                        <button id="pvp-link" class="py-1.5 px-3 rounded border border-gray-600 hover:border-yellow-400 hidden" onclick="navigate('pvp')">PvP Сборки</button>
+                        <button id="holiday-toggle" class="py-1.5 px-3 rounded border border-cyan-600 hover:border-cyan-300" title="Включить новогоднюю тему">❄️ Новый год</button>
+                    </div>
+                </nav>
+            </header>
+            <main class="max-w-6xl mx-auto p-4">
+                <div id="content-container" class="transition-opacity"></div>
+            </main>
+        </div>
+
+    <script>
+                // ------------------------
+                // Глобальные переменные
+                // ------------------------
+                let currentPage = 'main';
+                const STORAGE_KEYS = { missions: 'wosb_missions', role: 'wosb_user_role' };
+                let userRole = 'guest'; // 'guest' | 'member' | 'leader'
+                let missions = [];
+                let lightboxState = { open: false, items: [], index: 0 };
+
+                // ------------------------
+                // Утилиты и общие функции
+                // ------------------------
+                function showMessage(message, type = 'info') {
+                    const container = document.getElementById('app');
+                    let bgColor = 'bg-blue-600';
+                    if (type === 'success') bgColor = 'bg-green-600';
+                    if (type === 'error') bgColor = 'bg-red-600';
+
+                    const msgElement = document.createElement('div');
+                    msgElement.className = `fixed top-4 right-4 p-4 rounded-lg shadow-xl text-white z-50 transition-opacity duration-300 ${bgColor}`;
+                    msgElement.textContent = message;
+                    container.appendChild(msgElement);
+
+                    setTimeout(() => {
+                        msgElement.style.opacity = '0';
+                        msgElement.addEventListener('transitionend', () => msgElement.remove());
+                    }, 3000);
+                }
+
+                function navigate(targetPage) {
+                    currentPage = targetPage;
+                    const container = document.getElementById('content-container');
+                    container.classList.add('is-exiting');
+                    setTimeout(() => {
+                        container.innerHTML = getPageContent(targetPage);
+
+                        if (targetPage === 'main') {
+                            if (window.VanillaTilt) {
+                                VanillaTilt.init(document.querySelectorAll('.card-3d'), { max: 15, speed: 400, glare: true, 'max-glare': 0.2 });
+                            }
+                        }
+                        if (targetPage === 'craft') {
+                            const form = document.getElementById('craft-form');
+                            if (form) form.addEventListener('submit', calculateCraft);
+                        }
+                        if (targetPage === 'guides') initGuidesNav();
+                        if (targetPage === 'guild') initGuildTabs();
+                        if (targetPage === 'missions') initMissionsPage();
+                        if (targetPage === 'pvp') initPvpPage();
+                        if (targetPage === 'map') initMapPage();
+
+                        container.classList.remove('is-exiting');
+                    }, 300);
+                }
+
+                function getPageContent(page) {
+                    switch (page) {
+                        case 'main':
+                            return `
+                                <div class="space-y-12">
+                                    <header class="text-center py-8 rounded-xl shadow-2xl" style="background-color: var(--color-secondary-dark);">
+                                        <h2 class="text-5xl font-extrabold mb-4" style="color: var(--color-accent-gold);">Добро пожаловать, Капитан!</h2>
+                                        <p class="text-xl text-gray-300">Официальный информационный портал нашей доблестной гильдии.</p>
+                                    </header>
+
+                                    <section class="grid md:grid-cols-2 gap-8">
+                                        <div class="card-3d p-6 rounded-xl shadow-lg border border-gray-700" style="background-color: var(--color-secondary-dark);">
+                                            <h3 class="text-3xl font-semibold mb-4" style="color: var(--color-accent-gold);">🗺️ Актуальные Карты</h3>
+                                            <p class="text-gray-400 mb-4">Секретные места и маршруты для фарма и ресурсов.</p>
+                                            <a href="#" class="text-yellow-400 hover:text-yellow-300 transition block">Открыть интерактивную карту >></a>
+                                        </div>
+                                        <div class="card-3d p-6 rounded-xl shadow-lg border border-gray-700" style="background-color: var(--color-secondary-dark);">
+                                            <h3 class="text-3xl font-semibold mb-4" style="color: var(--color-accent-gold);">📝 Гайды для Новичков</h3>
+                                            <p class="text-gray-400 mb-4">Полный набор инструкций по прокачке и основам игры.</p>
+                                            <a href="#" class="text-yellow-400 hover:text-yellow-300 transition block">Читать все гайды >></a>
+                                        </div>
+                                    </section>
+
+                                    <section class="text-center p-8 rounded-xl shadow-2xl gold-border border-2" style="background-color: #1a273b;">
+                                        <h3 class="text-4xl font-bold mb-4" style="color: var(--color-accent-gold);">Вступай в наши ряды!</h3>
+                                        <p class="text-xl text-gray-300 mb-6">Ищешь сильную команду, советы и помощь? Присоединяйся к нам!</p>
+                                        <button onclick="scrollToForm()" class="gold-button font-bold py-3 px-8 rounded-lg shadow-lg">Отправить Заявку</button>
+                                    </section>
+
+                                    <section class="p-6 rounded-xl shadow-lg border border-gray-700" style="background-color: var(--color-secondary-dark);">
+                                        <h3 class="text-2xl font-semibold mb-2" style="color: var(--color-accent-gold);">Портал Доступов</h3>
+                                        <p class="text-gray-400 mb-1">Ключи гильдии: <span class="text-yellow-300">SEADOGS</span> (участник), <span class="text-yellow-300">ADMIRAL</span> (глава).</p>
+                                        <p class="text-gray-400 mb-4">Ключ PvP-сборок: <span class="text-yellow-300">PVPBUILD2024</span>.</p>
+                                        <div class="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-3">
+                                            <input type="text" id="secret-key-input" placeholder="Введите ключ доступа..." class="flex-grow p-3 rounded-lg text-black bg-gray-200">
+                                            <button onclick="checkAccessKey()" class="gold-button font-bold py-3 px-6 rounded-lg">Активировать</button>
+                                        </div>
+                                    </section>
+
+                                    <section id="guild-form-section" class="p-8 rounded-xl shadow-2xl mt-12" style="background-color: #1a273b;">
+                                        <h3 class="text-3xl font-bold mb-6 text-center" style="color: var(--color-accent-gold);">Анкета на вступление в Гильдию [???]</h3>
+                                        <form id="guild-application-form" onsubmit="submitApplication(event)" class="space-y-4 max-w-xl mx-auto">
+                                            <div>
+                                                <label for="nickname" class="block text-gray-300 mb-1">Ваш никнейм в игре:</label>
+                                                <input type="text" id="nickname" required class="w-full p-3 rounded-lg text-black bg-gray-200 focus:ring-yellow-400 focus:border-yellow-400 border-gray-600">
+                                            </div>
+                                            <div>
+                                                <label for="level" class="block text-gray-300 mb-1">Кол-во Репутации в Эспаньоле:</label>
+                                                <input type="number" id="level" required class="w-full p-3 rounded-lg text-black bg-gray-200 focus:ring-yellow-400 focus:border-yellow-400 border-gray-600">
+                                            </div>
+                                            <div>
+                                                <label for="experience" class="block text-gray-300 mb-1">Расскажите о себе:</label>
+                                                <textarea id="experience" rows="3" required class="w-full p-3 rounded-lg text-black bg-gray-200 focus:ring-yellow-400 focus:border-yellow-400 border-gray-600" placeholder="Ваши цели, стиль игры и почему хотите к нам."></textarea>
+                                            </div>
+                                            <button type="submit" class="gold-button font-bold py-3 px-6 w-full rounded-lg">Отправить Заявку</button>
+                                            <p class="text-xs text-gray-500 text-center pt-2">Заявка будет отправлена на общую почту гильдии (логируется в консоли).</p>
+                                        </form>
+                                    </section>
+                                </div>
+                            `;
+                        case 'missions':
+                            return `
+                                <h2 class="text-4xl font-bold mb-2 text-center" style="color: var(--color-accent-gold);">Миссии Гильдии</h2>
+                                <p id="role-badge" class="text-center text-gray-300 mb-6">Ваша роль: Гость</p>
+
+                                <div id="mission-create" class="p-6 rounded-xl shadow-lg border border-gray-700 hidden" style="background-color: var(--color-secondary-dark);">
+                                    <h3 class="text-2xl font-semibold mb-4" style="color: var(--color-accent-gold);">Создать новую миссию</h3>
+                                    <form id="mission-form" class="grid md:grid-cols-2 gap-4">
+                                        <div class="md:col-span-1">
+                                            <label class="block text-gray-300 mb-1">Название</label>
+                                            <input id="m-title" type="text" class="w-full p-3 rounded-lg text-black bg-gray-200" required>
+                                        </div>
+                                        <div class="md:col-span-1">
+                                            <label class="block text-gray-300 mb-1">Награда</label>
+                                            <input id="m-reward" type="text" class="w-full p-3 rounded-lg text-black bg-gray-200" placeholder="золото/ресурсы/ранг" required>
+                                        </div>
+                                        <div class="md:col-span-2">
+                                            <label class="block text-gray-300 mb-1">Описание</label>
+                                            <textarea id="m-desc" rows="3" class="w-full p-3 rounded-lg text-black bg-gray-200" placeholder="Что нужно сделать" required></textarea>
+                                        </div>
+                                        <div class="md:col-span-2 text-right">
+                                            <button type="submit" class="gold-button font-bold py-2 px-6 rounded-lg">Добавить миссию</button>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <div class="p-6 rounded-xl shadow-lg mt-6" style="background-color: var(--color-secondary-dark);">
+                                    <h3 class="text-2xl font-semibold mb-4" style="color: var(--color-accent-gold);">Доступные миссии</h3>
+                                    <div id="missions-list" class="grid md:grid-cols-2 gap-4"></div>
+                                    <p id="missions-empty" class="text-center text-gray-400 py-6 hidden">Миссий пока нет.</p>
+                                </div>
+                            `;
+                        case 'guides':
+                            return `
+                                <h2 class="text-4xl font-bold mb-6 text-center" style="color: var(--color-accent-gold);">База Знаний</h2>
+                                <div class="p-4 rounded-xl shadow-lg mb-6" style="background-color: var(--color-secondary-dark);">
+                                    <div id="guides-nav" class="flex flex-wrap gap-2 justify-center" role="tablist" aria-label="Guides list">
+                                        <button class="guide-nav-btn py-2 px-3 rounded-lg border border-gray-600 hover:border-yellow-400 transition" data-guide="ships" aria-selected="true">Корабли</button>
+                                        <button class="guide-nav-btn py-2 px-3 rounded-lg border border-gray-600 hover:border-yellow-400 transition" data-guide="consumables" aria-selected="false">Расходные предметы</button>
+                                        <button class="guide-nav-btn py-2 px-3 rounded-lg border border-gray-600 hover:border-yellow-400 transition" data-guide="mines" aria-selected="false">Рудники</button>
+                                        <button class="guide-nav-btn py-2 px-3 rounded-lg border border-gray-600 hover:border-yellow-400 transition" data-guide="trade" aria-selected="false">Торговля</button>
+                                        <button class="guide-nav-btn py-2 px-3 rounded-lg border border-gray-600 hover:border-yellow-400 transition" data-guide="specialcrew" aria-selected="false">Специальный экипаж</button>
+                                        <button class="guide-nav-btn py-2 px-3 rounded-lg border border-gray-600 hover:border-yellow-400 transition" data-guide="escarda-bots" aria-selected="false">Боты в Эскарду</button>
+                                        <button class="guide-nav-btn py-2 px-3 rounded-lg border border-gray-600 hover:border-yellow-400 transition" data-guide="imperial-flagships" aria-selected="false">Имперские флагманы</button>
+                                        <button class="guide-nav-btn py-2 px-3 rounded-lg border border-gray-600 hover:border-yellow-400 transition" data-guide="mortars" aria-selected="false">Мортиры</button>
+                                        <button class="guide-nav-btn py-2 px-3 rounded-lg border border-gray-600 hover:border-yellow-400 transition" data-guide="artillery" aria-selected="false">Артиллерийское дело</button>
+                                        <button class="guide-nav-btn py-2 px-3 rounded-lg border border-gray-600 hover:border-yellow-400 transition" data-guide="tactics" aria-selected="false">Тактика и маневры</button>
+                                        <button class="guide-nav-btn py-2 px-3 rounded-lg border border-gray-600 hover:border-yellow-400 transition" data-guide="map" aria-selected="false">Карта</button>
+                                    </div>
+                                </div>
+                                <div id="guide-content" class="rounded-xl shadow-lg border border-gray-700 p-5 bg-slate-800"></div>
+                            `;
+                        case 'craft':
+                            return `
+                                <h2 class="text-4xl font-bold mb-8" style="color: var(--color-accent-gold);">Калькулятор Крафта</h2>
+
+                                <div class="p-6 rounded-xl shadow-lg mb-8" style="background-color: var(--color-secondary-dark);">
+                                    <h3 class="text-3xl font-semibold mb-4 text-center">⚙️ Калькулятор ресурсов</h3>
+                                    <p class="text-center text-gray-400 mb-6">Введите желаемое количество финального предмета для расчета необходимых ресурсов.</p>
+                            
+                                    <form id="craft-form" class="max-w-md mx-auto space-y-4">
+                                        <div>
+                                            <label for="output-item" class="block text-gray-300 mb-1">Что крафтим:</label>
+                                            <select id="output-item" class="w-full p-3 rounded-lg text-black bg-gray-200 focus:ring-yellow-400 focus:border-yellow-400">
+                                                <option value="Balka">Балка</option>
+                                                <option value="Plastina">Пластина</option>
+                                                <option value="Pereborka">Переборка</option>
+                                                <option value="Bronza">Бронза</option>
+                                                <option value="Parusina">Парусина</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="quantity" class="block text-gray-300 mb-1">Необходимое количество:</label>
+                                            <input type="number" id="quantity" value="1" min="1" required class="w-full p-3 rounded-lg text-black bg-gray-200 focus:ring-yellow-400 focus:border-yellow-400">
+                                        </div>
+                                        <button type="submit" class="gold-button font-bold py-3 px-6 w-full rounded-lg">Рассчитать</button>
+                                    </form>
+
+                                    <div id="craft-result" class="mt-6 p-4 rounded-lg gold-border border-2 bg-slate-700 hidden">
+                                        <h4 class="text-xl font-bold mb-3" style="color: var(--color-accent-gold);">Результаты Расчета:</h4>
+                                        <ul class="list-disc list-inside space-y-1" id="result-list"></ul>
+                                    </div>
+                                </div>
+                            `;
+                        case 'guild':
+                            return `
+                                <h2 class="text-4xl font-bold mb-8 text-center" style="color: var(--color-accent-gold);">Наша Гильдия: Информация и Почетный Список</h2>
+                        
+                                <div class="p-8 rounded-xl shadow-2xl mb-12 gold-border border-2" style="background-color: #1a273b;">
+                                    <h3 class="text-3xl font-bold mb-4">⚓ Кто мы???</h3>
+                                    <p class="text-gray-400 italic">Здесь будет размещена информация о нашей гильдии. Пока раздел пуст по Вашему запросу.</p>
+                                </div>
+
+                                <div class="p-8 rounded-xl shadow-2xl" style="background-color: var(--color-secondary-dark);">
+                                    <h3 class="text-3xl font-bold mb-6 text-center" style="color: var(--color-accent-gold);">⚔️ Доска Почета Гильдии</h3>
+                                    <div class="grid grid-cols-3 gap-4 p-3 mb-3 font-bold text-lg border-b border-yellow-400">
+                                        <div>#</div>
+                                        <div>Никнейм</div>
+                                        <div>Звание</div>
+                                    </div>
+                                    <div class="text-center text-gray-500 pt-10">Список участников пока пуст.</div>
+                                </div>
+
+                                <div class="p-8 mt-8 rounded-xl shadow-2xl" style="background-color: var(--color-secondary-dark);">
+                                    <h3 class="text-3xl font-bold mb-6 text-center" style="color: var(--color-accent-gold);">🏅 Отчеты и Достижения</h3>
+                                    <div class="flex flex-wrap gap-3 justify-center mb-6" role="tablist" aria-label="Guild reports tabs">
+                                        <button class="tab-btn py-2 px-4 rounded-lg border border-gray-600 hover:border-yellow-400 transition" data-tab="pb" aria-selected="true">ПБ Отчет</button>
+                                        <button class="tab-btn py-2 px-4 rounded-lg border border-gray-600 hover:border-yellow-400 transition" data-tab="tournament" aria-selected="false">Турнир</button>
+                                        <button class="tab-btn py-2 px-4 rounded-lg border border-gray-600 hover:border-yellow-400 transition" data-tab="season" aria-selected="false">Сезонные достижения</button>
+                                    </div>
+                                    <div id="guild-tabs-content" class="rounded-lg border border-gray-700 p-5 bg-slate-800 min-h-[180px]"></div>
+                                </div>
+                            `;
+                        case 'pvp':
+                            return `
+                                <h2 class="text-4xl font-bold mb-6 text-center" style="color: var(--color-accent-gold);">🔐 Секретный Раздел: PvP Сборки</h2>
+                                <p class="text-center text-green-400 mb-6">Доступ разрешен. Добро пожаловать, доверенный Капитан!</p>
+                                <div id="pvp-builds" class="space-y-6">
+                                    <details class="rounded-xl border border-gray-700 bg-slate-800">
+                                        <summary class="list-none cursor-pointer select-none p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                            <div>
+                                                <h3 class="text-2xl font-bold" style="color: var(--color-accent-gold);">1) Kwee Song</h3>
+                                                <p class="text-gray-400 text-sm">Нажмите на фото корабля, чтобы раскрыть билд.</p>
+                                            </div>
+                                            <img class="rounded-lg border border-gray-700 bg-slate-900 max-h-32 object-cover" data-num="25" alt="Kwee Song" />
+                                        </summary>
+                                        <div class="p-4 sm:p-6 space-y-6">
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Специальный экипаж</h4>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="26" alt="Kwee Song — спецэкипаж" />
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Что ложить в трюм</h4>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="27" alt="Kwee Song — трюм" />
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Расходники</h4>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="28" alt="Kwee Song — расходники" />
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Апгрейды (выбрать один из вариантов)</h4>
+                                                <div class="grid sm:grid-cols-3 gap-3">
+                                                    ${[29,30,31].map((n,i)=>`
+                                                        <img class=\"pvp-upg-thumb w-full h-32 object-cover rounded border border-gray-700 bg-slate-900 cursor-pointer\" data-idx=\"${i+1}\" data-num=\"${n}\" alt=\"Kwee Song — апгрейд #${i+1}\" />
+                                                    `).join('')}
+                                                </div>
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Дизайны</h4>
+                                                <p class="text-gray-300 mb-2">Любая носовая фигура, которая вам нравится (желательно за монеты).</p>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="32" alt="Kwee Song — дизайны" />
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Пушки</h4>
+                                                <div class="grid sm:grid-cols-2 gap-3">
+                                                    <div>
+                                                        <div class="text-gray-300 mb-1">Борта</div>
+                                                        <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="33" alt="Kwee Song — борта" />
+                                                    </div>
+                                                    <div>
+                                                        <div class="text-gray-300 mb-1">Нос</div>
+                                                        <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="34" alt="Kwee Song — нос" />
+                                                    </div>
+                                                </div>
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Держать наготове</h4>
+                                                <p class="text-gray-300 mb-2">Ставить только по команде.</p>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="35" alt="Kwee Song — наготове" />
+                                            </section>
+                                        </div>
+                                    </details>
+
+                                    <details class="rounded-xl border border-gray-700 bg-slate-800">
+                                        <summary class="list-none cursor-pointer select-none p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                            <div>
+                                                <h3 class="text-2xl font-bold" style="color: var(--color-accent-gold);">2) Eagle</h3>
+                                                <p class="text-gray-400 text-sm">Нажмите на фото корабля, чтобы раскрыть билд.</p>
+                                            </div>
+                                            <img class="rounded-lg border border-gray-700 bg-slate-900 max-h-32 object-cover" data-num="36" alt="Eagle" />
+                                        </summary>
+                                        <div class="p-4 sm:p-6 space-y-6">
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Специальный экипаж</h4>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="37" alt="Eagle — спецэкипаж" />
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Что ложить в трюм</h4>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="38" alt="Eagle — трюм" />
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Расходники</h4>
+                                                <p class="text-gray-300 mb-2">Выбираем 1 из вариантов. Рекомендуемый запас: <span class="text-yellow-300">50 шт. каждого вида</span>.</p>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="39" alt="Eagle — расходники" />
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Апгрейды (выбрать один из сетапов)</h4>
+                                                <div class="grid sm:grid-cols-2 gap-3">
+                                                    <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="40" alt="Eagle — апгрейды #1" />
+                                                    <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="41" alt="Eagle — апгрейды #2" />
+                                                </div>
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Дизайны</h4>
+                                                <p class="text-gray-300 mb-2">Любая носовая фигура, которая вам нравится (желательно за монеты).</p>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="42" alt="Eagle — дизайны" />
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Пушки</h4>
+                                                <div class="grid sm:grid-cols-2 gap-3">
+                                                    <div>
+                                                        <div class="text-gray-300 mb-1">Борта</div>
+                                                        <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="43" alt="Eagle — борта" />
+                                                    </div>
+                                                    <div>
+                                                        <div class="text-gray-300 mb-1">Корма</div>
+                                                        <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="44" alt="Eagle — корма" />
+                                                    </div>
+                                                </div>
+                                                <p class="text-gray-300 mt-2">Пушки выбираем из предложенных выше. 1 борт = 1 вид пушек.</p>
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Мортиры</h4>
+                                                <div class="grid sm:grid-cols-2 gap-3">
+                                                    <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="45" alt="Eagle — мортиры #1" />
+                                                    <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="46" alt="Eagle — мортиры #2" />
+                                                </div>
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Держать наготове</h4>
+                                                <p class="text-gray-300 mb-2">Ставить только по команде.</p>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="47" alt="Eagle — наготове" />
+                                            </section>
+                                        </div>
+                                    </details>
+
+                                    <details class="rounded-xl border border-gray-700 bg-slate-800">
+                                        <summary class="list-none cursor-pointer select-none p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                            <div>
+                                                <h3 class="text-2xl font-bold" style="color: var(--color-accent-gold);">3) Sparrow</h3>
+                                                <p class="text-gray-400 text-sm">Нажмите на фото корабля, чтобы раскрыть билд.</p>
+                                            </div>
+                                            <img class="rounded-lg border border-gray-700 bg-slate-900 max-h-32 object-cover" data-num="48" alt="Sparrow" />
+                                        </summary>
+                                        <div class="p-4 sm:p-6 space-y-6">
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Специальный экипаж</h4>
+                                                <div class="grid sm:grid-cols-2 gap-3">
+                                                    <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="49" alt="Sparrow — спецэкипаж #1" />
+                                                    <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="50" alt="Sparrow — спецэкипаж #2" />
+                                                </div>
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Что ложить в трюм</h4>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="51" alt="Sparrow — трюм" />
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Расходники</h4>
+                                                <p class="text-gray-300 mb-2">Выбираем 1 из вариантов. Рекомендуемый запас: <span class="text-yellow-300">50 шт. каждого вида</span>.</p>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="52" alt="Sparrow — расходники" />
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Апгрейды</h4>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="53" alt="Sparrow — апгрейды" />
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Дизайны</h4>
+                                                <p class="text-gray-300 mb-2">Любая носовая фигура, которая вам нравится (желательно за монеты).</p>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="54" alt="Sparrow — дизайны" />
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Пушки</h4>
+                                                <div>
+                                                    <div class="text-gray-300 mb-1">Борта</div>
+                                                    <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="55" alt="Sparrow — борта" />
+                                                </div>
+                                                <p class="text-gray-300 mt-2">Пушки выбираем из предложенных выше. 1 борт = 1 вид пушек.</p>
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Мортиры</h4>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="56" alt="Sparrow — мортиры" />
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Держать наготове</h4>
+                                                <p class="text-gray-300 mb-2">Ставить только по команде.</p>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="57" alt="Sparrow — наготове" />
+                                            </section>
+                                        </div>
+                                    </details>
+
+                                    <details class="rounded-xl border border-gray-700 bg-slate-800">
+                                        <summary class="list-none cursor-pointer select-none p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                            <div>
+                                                <h3 class="text-2xl font-bold" style="color: var(--color-accent-gold);">4) Essex</h3>
+                                                <p class="text-gray-400 text-sm">Нажмите на фото корабля, чтобы раскрыть билд.</p>
+                                            </div>
+                                            <img class="rounded-lg border border-gray-700 bg-slate-900 max-h-32 object-cover" data-num="58" alt="Essex" />
+                                        </summary>
+                                        <div class="p-4 sm:p-6 space-y-6">
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Специальный экипаж</h4>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="59" alt="Essex — спецэкипаж" />
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Что ложить в трюм</h4>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="60" alt="Essex — трюм" />
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Расходники</h4>
+                                                <p class="text-gray-300 mb-2">Выбираем 1 из вариантов. Рекомендуемый запас: <span class="text-yellow-300">50 шт. каждого вида</span>.</p>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="61" alt="Essex — расходники" />
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Апгрейды (выбрать один из сетапов)</h4>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="62" alt="Essex — апгрейды" />
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Дизайны</h4>
+                                                <p class="text-gray-300 mb-2">Любая носовая фигура, которая вам нравится (желательно за монеты).</p>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="63" alt="Essex — дизайны" />
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Пушки</h4>
+                                                <div class="grid sm:grid-cols-3 gap-3">
+                                                    <div>
+                                                        <div class="text-gray-300 mb-1">Борта</div>
+                                                        <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="64" alt="Essex — борта" />
+                                                    </div>
+                                                    <div>
+                                                        <div class="text-gray-300 mb-1">Нос</div>
+                                                        <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="65" alt="Essex — нос" />
+                                                    </div>
+                                                    <div>
+                                                        <div class="text-gray-300 mb-1">Корма</div>
+                                                        <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="66" alt="Essex — корма" />
+                                                    </div>
+                                                </div>
+                                                <p class="text-gray-300 mt-2">Пушки выбираем из предложенных выше. 1 борт = 1 вид пушек.</p>
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Держать наготове</h4>
+                                                <p class="text-gray-300 mb-2">Ставить только по команде.</p>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="67" alt="Essex — наготове" />
+                                            </section>
+                                        </div>
+                                    </details>
+
+                                    <details class="rounded-xl border border-gray-700 bg-slate-800">
+                                        <summary class="list-none cursor-pointer select-none p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                            <div>
+                                                <h3 class="text-2xl font-bold" style="color: var(--color-accent-gold);">5) Red Arrow</h3>
+                                                <p class="text-gray-400 text-sm">Нажмите на фото корабля, чтобы раскрыть билд.</p>
+                                            </div>
+                                            <img class="rounded-lg border border-gray-700 bg-slate-900 max-h-32 object-cover" data-num="68" alt="Red Arrow" />
+                                        </summary>
+                                        <div class="p-4 sm:p-6 space-y-6">
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Специальный экипаж</h4>
+                                                <div class="grid sm:grid-cols-2 gap-3">
+                                                    <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="69" alt="Red Arrow — спецэкипаж #1" />
+                                                    <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="70" alt="Red Arrow — спецэкипаж #2" />
+                                                </div>
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Что ложить в трюм</h4>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="71" alt="Red Arrow — трюм" />
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Расходники</h4>
+                                                <p class="text-gray-300 mb-2">Выбираем 1 из вариантов. Рекомендуемый запас: <span class="text-yellow-300">50 шт. каждого вида</span>.</p>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="72" alt="Red Arrow — расходники" />
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Апгрейды (выбрать один из сетапов)</h4>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="73" alt="Red Arrow — апгрейды" />
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Дизайны</h4>
+                                                <p class="text-gray-300 mb-2">Любая носовая фигура, которая вам нравится (желательно за монеты).</p>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="74" alt="Red Arrow — дизайны" />
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Пушки</h4>
+                                                <div class="grid sm:grid-cols-2 gap-3">
+                                                    <div>
+                                                        <div class="text-gray-300 mb-1">Борта</div>
+                                                        <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="75" alt="Red Arrow — борта" />
+                                                    </div>
+                                                    <div>
+                                                        <div class="text-gray-300 mb-1">Нос</div>
+                                                        <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="76" alt="Red Arrow — нос" />
+                                                    </div>
+                                                </div>
+                                                <p class="text-gray-300 mt-2">Пушки выбираем из предложенных выше. 1 борт = 1 вид пушек.</p>
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Мортиры</h4>
+                                                <div class="grid sm:grid-cols-2 gap-3">
+                                                    <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="77" alt="Red Arrow — мортиры #1" />
+                                                    <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="78" alt="Red Arrow — мортиры #2" />
+                                                </div>
+                                            </section>
+                                        </div>
+                                    </details>
+
+                                    <details class="rounded-xl border border-gray-700 bg-slate-800">
+                                        <summary class="list-none cursor-pointer select-none p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                            <div>
+                                                <h3 class="text-2xl font-bold" style="color: var(--color-accent-gold);">6) Kobukson</h3>
+                                                <p class="text-gray-400 text-sm">Нажмите на фото корабля, чтобы раскрыть билд.</p>
+                                            </div>
+                                            <img class="rounded-lg border border-gray-700 bg-slate-900 max-h-32 object-cover" data-num="80" alt="Kobukson" />
+                                        </summary>
+                                        <div class="p-4 sm:p-6 space-y-6">
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Специальный экипаж</h4>
+                                                <div class="grid sm:grid-cols-2 gap-3">
+                                                    <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="81" alt="Kobukson — спецэкипаж #1" />
+                                                    <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="82" alt="Kobukson — спецэкипаж #2" />
+                                                </div>
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Что ложить в трюм</h4>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="83" alt="Kobukson — трюм" />
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Расходники</h4>
+                                                <p class="text-gray-300 mb-2">Выбираем 1 из вариантов. Рекомендуемый запас: <span class="text-yellow-300">50 шт. каждого вида</span>.</p>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="84" alt="Kobukson — расходники" />
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Апгрейды (выбрать один из сетапов)</h4>
+                                                <div class="grid sm:grid-cols-2 gap-3">
+                                                    <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="85" alt="Kobukson — апгрейды #1" />
+                                                    <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="86" alt="Kobukson — апгрейды #2" />
+                                                </div>
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Доп. апгрейды (качать и ставить при необходимости)</h4>
+                                                <div class="grid sm:grid-cols-2 gap-3">
+                                                    <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="87" alt="Kobukson — доп. апгрейды #1" />
+                                                    <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="88" alt="Kobukson — доп. апгрейды #2" />
+                                                </div>
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Дизайны</h4>
+                                                <p class="text-gray-300 mb-2">Любая носовая фигура, которая вам нравится (желательно за монеты).</p>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="89" alt="Kobukson — дизайны" />
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Пушки</h4>
+                                                <div>
+                                                    <div class="text-gray-300 mb-1">Борта</div>
+                                                    <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="90" alt="Kobukson — борта" />
+                                                </div>
+                                                <p class="text-gray-300 mt-2">Пушки выбираем из предложенных выше. 1 борт = 1 вид пушек.</p>
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Мортиры</h4>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="91" alt="Kobukson — мортиры" />
+                                            </section>
+                                            <section>
+                                                <h4 class="text-xl font-semibold text-yellow-300 mb-2">Держать наготове</h4>
+                                                <p class="text-gray-300 mb-2">Ставить только по команде.</p>
+                                                <img class="pvp-img-single w-full max-h-[50vh] object-contain rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="92" alt="Kobukson — наготове" />
+                                            </section>
+                                        </div>
+                                    </details>
+                                </div>
+                            `;
+                        case 'map':
+                            return `
+                                <h2 class="text-4xl font-bold mb-4 text-center" style="color: var(--color-accent-gold);">Интерактивная Карта</h2>
+                                <div class="flex flex-wrap gap-2 justify-center mb-3 text-sm">
+                                    <button id="map-page-reset" class="px-4 py-1.5 rounded border border-gray-600 hover:border-yellow-400">Сброс</button>
+                                    <button id="map-page-fit" class="px-4 py-1.5 rounded border border-gray-600 hover:border-yellow-400">По размеру</button>
+                                    <button id="map-page-fullscreen" class="px-4 py-1.5 rounded border border-gray-600 hover:border-yellow-400">Полный экран</button>
+                                    <button id="map-page-zoom-in" class="px-3 py-1.5 rounded border border-gray-600 hover:border-yellow-400">+</button>
+                                    <button id="map-page-zoom-out" class="px-3 py-1.5 rounded border border-gray-600 hover:border-yellow-400">−</button>
+                                    <label class="flex items-center gap-1">Зум
+                                        <input id="map-page-zoom-range" type="range" min="20" max="800" value="100" class="accent-yellow-400 cursor-pointer">
+                                    </label>
+                                    <button id="map-page-toggle-ui" class="px-3 py-1.5 rounded border border-gray-600 hover:border-yellow-400">UI</button>
+                                </div>
+                                <p class="text-gray-400 text-xs text-center mb-2">Колесо / pinch: зум · Drag: перемещение · Двойной клик: увеличить · Shift+двойной клик: уменьшить · Стрелки: пан · +/-: зум</p>
+                                <div id="map-page-stage" class="relative w-full h-[78vh] sm:h-[83vh] overflow-hidden rounded-lg border border-gray-700 bg-slate-900 touch-none select-none">
+                                    <img id="map-page-image" alt="Карта мира" data-num="94" class="absolute top-0 left-0 will-change-transform" />
+                                    <canvas id="map-page-minimap" width="180" height="120" class="absolute right-2 bottom-2 bg-black/40 backdrop-blur-sm rounded border border-gray-600"></canvas>
+                                </div>
+                            `;
+                        default:
+                            return `<h2 class="text-4xl text-red-500">Страница не найдена.</h2>`;
+                    }
+                }
+
+                // ------------------------
+                // Вкладки гильдии: ПБ/Турнир/Сезон
+                // ------------------------
+                function initGuildTabs() {
+                    const container = document.getElementById('guild-tabs-content');
+                    const buttons = document.querySelectorAll('.tab-btn');
+                    if (!container || !buttons.length) return;
+                    renderGuildTab('pb');
+                    setActive('pb');
+                    buttons.forEach(btn => btn.addEventListener('click', () => {
+                        const tab = btn.getAttribute('data-tab');
+                        renderGuildTab(tab);
+                        setActive(tab);
+                    }));
+                    function setActive(tab) {
+                        buttons.forEach(b => {
+                            const isActive = b.getAttribute('data-tab') === tab;
+                            b.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                            b.classList.toggle('border-yellow-400', isActive);
+                            b.classList.toggle('bg-slate-900', isActive);
+                        });
+                    }
+                }
+
+                function renderGuildTab(tab) {
+                    const container = document.getElementById('guild-tabs-content');
+                    if (!container) return;
+                    let html = '';
+                    if (tab === 'pb') {
+                        html = `
+                            <h4 class="text-xl font-bold mb-3" style="color: var(--color-accent-gold);">ПБ Отчет</h4>
+                            <p class="text-gray-300 mb-4">Альбом скриншотов (1–14). Нажмите на изображение, чтобы открыть в полноэкранном режиме.</p>
+                            <div id="pb-gallery" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"></div>
+                        `;
+                    } else if (tab === 'tournament') {
+                        html = `
+                            <h4 class="text-xl font-bold mb-3" style="color: var(--color-accent-gold);">Турнир</h4>
+                            <p class="text-gray-300 mb-4">Информация о текущих/прошедших турнирах, турнирные сетки и результаты.</p>
+                            <div class="text-gray-400">Нет записей. Ожидаются данные от организаторов.</div>
+                        `;
+                    } else if (tab === 'season') {
+                        html = `
+                            <h4 class="text-xl font-bold mb-3" style="color: var(--color-accent-gold);">Сезонные достижения</h4>
+                            <p class="text-gray-300 mb-4">Лучшие результаты и достижения гильдии за текущий сезон.</p>
+                            <ol class="list-decimal list-inside text-gray-200 space-y-1">
+                                <li>—</li>
+                            </ol>
+                        `;
+                    }
+                    container.innerHTML = html;
+                    if (tab === 'pb') initPBGallery(14);
+                }
+
+                // ------------------------
+                // База знаний: навигация по отдельным гайдам
+                // ------------------------
+                function initGuidesNav() {
+                    const content = document.getElementById('guide-content');
+                    const buttons = document.querySelectorAll('.guide-nav-btn');
+                    if (!content || !buttons.length) return;
+                    renderGuide('ships');
+                    ensureGuideSnow();
+                    setActive('ships');
+                    buttons.forEach(btn => btn.addEventListener('click', () => {
+                        const guide = btn.getAttribute('data-guide');
+                        renderGuide(guide);
+                        setActive(guide);
+                        ensureGuideSnow();
+                    }));
+                    function setActive(guide) {
+                        buttons.forEach(b => {
+                            const isActive = b.getAttribute('data-guide') === guide;
+                            b.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                            b.classList.toggle('border-yellow-400', isActive);
+                            b.classList.toggle('bg-slate-900', isActive);
+                        });
+                    }
+                }
+
+                function renderGuide(guide) {
+                    const container = document.getElementById('guide-content');
+                    if (!container) return;
+                    let html = '';
+                    if (guide === 'ships') {
+                        html = `
+                            <article class="p-6 rounded-xl shadow-lg border border-gray-700" style="background-color: var(--color-secondary-dark);">
+                                <h3 class="text-3xl font-bold mb-2" style="color: var(--color-accent-gold);">Гайд: Корабли</h3>
+                                <p class="text-gray-300 mb-4">Подборка кораблей по назначению: перемещение, фарм, рейды, массовые бои и портовые бои. Выбирайте по задачам и бюджету.</p>
+                                <div class="space-y-4">
+                                    <details open class="bg-slate-800 rounded-lg border border-gray-700 p-4">
+                                        <summary class="cursor-pointer font-semibold text-yellow-300">1. ПЕРЕМЕЩЕНИЕ</summary>
+                                        <pre class="mt-2 text-gray-200 whitespace-pre-wrap">Эта категория подразумевает корабли наиболее эффективные для быстрого перемещения по карте.
+------ Начальные варианты ------
+La Creole, V ранг, 60 к. (Дешевый и быстрый, 11 узлов по ттх, самое то для начала)
+La Requin, V ранг, 70 к. (Дешевый и быстрый, 9.6 узлов по ттх, может ходить против ветра)
+------ Поздние варианты ------
+Flying Cloud, IV ранг, 2.7 кк. (Самый быстрый корабль в игре, 11.5 узлов по ттх, при этом имеет 30 тонн трюма)
+Ballon, VI ранг, 5 кк. (Самое быстрое средство перемещение в игре, 20.5 узлов по ттх, летит на высоте, и по этому практически неуязвим. Очень капризен по отношению к ветру)
+Savannah, VI ранг, 40 кк. (Лучший корабль для перемещения по карте, 10.8 узлов по ттх, при этом имеет паровой двигатель, позволяющий забыть о таком понятии как ветер)</pre>
+                                    </details>
+                                    <details class="bg-slate-800 rounded-lg border border-gray-700 p-4">
+                                        <summary class="cursor-pointer font-semibold text-yellow-300">2. ФАРМ И ПЕРЕВОЗКА ГРУЗОВ</summary>
+                                        <pre class="mt-2 text-gray-200 whitespace-pre-wrap">Эта категория подразумевает корабли наиболее эффективные для фарма ботов и перевозки лута.
+Russia, V ранг, 70 к. (Единственное преимущество этого корабля, это его цена. Как можно скорее смените на Mordaunt)
+Mordaunt, III ранг, 280 к. (Вот это уже достойны корабль, лучший по соотношению цены и качества. Имеет вместительный трюм и большую команду.)
+La Couronne, I ранг, 1.4 кк. (Лучший корабль в игре. Самый большой трюм и количество экипажа.)</pre>
+                                    </details>
+                                    <details class="bg-slate-800 rounded-lg border border-gray-700 p-4">
+                                        <summary class="cursor-pointer font-semibold text-yellow-300">3. РЕЙД</summary>
+                                        <pre class="mt-2 text-gray-200 whitespace-pre-wrap">Эта категория подразумевает корабли наиболее эффективные для сражений в открытом мире.
+------ Начальные варианты ------
+Poltava, III ранг, 370 к. (Самый быстрый PVP корабль. Имеет отличную скорость и маневр, однако как и все быстроходные корабли обладает слабым вооружением, броней и количеством хп)
+Ingermanland, II ранг, 425 к. (То же самое что и Poltava, только больший упор сделан в огневую мощь, сохраняя при этом высокую скорость)
+Sans Pareil, II ранг, 920 к. (Сбалансированный боевой корабль. Имеет хорошее вооружение, большую команду и среднюю броню. Однако скорость не впечатляет)
+------ Поздние варианты ------
+Octopus, II ранг, 100 кк. (Пожалуй лучший корабль для рейдов по открытому миру. Загибайте пальцы, имеет - Хорошую скорость, броню, команду и вооружение. И на сладкое, сразу две очень мощные фишки. Первая это инвиз, корабль скрыт от глаз на расстоянии 150 или более, что позволяет незаметно перемещаться. А вторая это роза ветров, которая позволяет ходить против ветра, из-за чего корабль невозможно догнать. Единственный серьезный недостаток это цена)) )
+Sovereign, I ранг, 10 кк. (Страшная боевая машина. Корабль довольно жирный, как по количеству хп, так и по размеру модельки. Имеет отличное вооружение и команду. Ну и на сладкое 2 мортиры на носу, которые путем несложных манипуляций превращаются в "парусорезку". Страдает от низкой скорости)
+
+------ Донатные варианты ------
+Firestorm, II ранг, 2600 рублей. (Корабль очень скилозависимый, но в правильных руках творит чудеса. Это быстроходный корабль, по этому имеет хорошую скорость и маневр, но что нехарактерно для быстроходных кораблей при этом имеет нормальное вооружение и команду. Корабль очень универсальный, и неплохо себя показывает даже в ближнем бою.)
+Neptuno, II ранг, 2500 рублей. (Лучший корабль для любителей закидывать абордажные крюки на вражескую палубу. Имеет огромную команду, хорошее вооружение, а так же достойную скорость и маневр. Ну и на сладкое 4 тысячи тонн водоизмещения, позволяющие разламывать вражеский корабль пополам при таране)
+De Zeven Provincien, I ранг, 2800 рублей. (Помните Санс Парель?. Ну вот Провинция это Парель только лучше по всем параметрам. Имеет шикарное вооружение, большую команду и неплохую броню. Скорость и маневр звезд с неба не хватают, но и стыдно за них не будет)</pre>
+                                    </details>
+                                    <details class="bg-slate-800 rounded-lg border border-gray-700 p-4">
+                                        <summary class="cursor-pointer font-semibold text-yellow-300">4. ТАЗИКОВЫЙ БОЙ</summary>
+                                        <pre class="mt-2 text-gray-200 whitespace-pre-wrap">Эта категория подразумевает корабли наиболее эффективные для массовых замесов.
+Предисловие - В списке настолько много кораблей, потому что каждый из них сражается только на своем ранге. (За одним исключением, корабли 2 ранга хорошо себя чувствуют на 1 ранге. Так же некоторые мортиры могут играться на рангах выше)
+Расшифровка определений -
+1 - Классический тяж. (Корабли данного типа медленные и неповоротливые, но имеют отличное хп, броню, команду и вооружение)
+2 - Классическая мортира (Корабли данного типа жертвуют хп, броней, вооружением и командой, ради мортиры. Обычно имеют хорошую скорость и маневр)
+------ VI ранг ------
+Phoenix, VI ранг, 20 к. (Классический тяж.)
+Shunsen, VI ранг, 450 к. (Очень страшная машина на своем ранге. Имеет огромный маневр, хорошую скорость и чудовищное вооружение. Пока другие корабли на этом ранге довольствуются пушками до 28 фунтов, на Шунсен можно воткнуть пушки 40 - 42 фунта. Так же Шунсен обладает 10 фальконетами, для справки 10 фальконет только начинают появляться на 3 ранге. Из минусов слабая броня.)
+Golden Apostle, VI ранг, 150 к. (Классическая мортира)
+------ V ранг ------
+San Martin, V ранг, 95 к. (Классический тяж.)
+Eagle, V ранг, 600 рублей. (Классическая мортира)
+------ IV ранг ------
+Essex, IV ранг, 205 к. (Похож по ттх на конституцию, только у него немного меньше хп, брони, пушек и команды. Компенсируется это высоким маневром, позволяющим эффективно разыгрывать оба борта)
+Constitution, IV ранг, 240 к. (Классический тяж.)
+Devourer, IV ранг, 3.3 кк. (Очень достойны корабль. Имеет огромный маневр и хорошую команду, все остальные характеристики в пределах средних значений. Фишка корабля в том, что его орудия расположены в основном на носу и корме. А как мы знаем туда можно устанавливать более мощные орудия. Отлично сочетается с апгрейдом на улучшение носовых и кормовых орудий.)
+Red Arrow, IV ранг, 1200 рублей. (Гибрид боевого и мортирного корабля. Отличный маневр и большая команда. Остальные значения средние. Имеет 1 мортиру до 7 фунтов)
+Sparrow, IV ранг, 1000 рублей. (Классическая мортира. Имеет крайне маленький хитбокс, что плюс)
+------ III ранг ------
+Poltava, III ранг, 370 к. (Быстроходный корабль, описание которого вы уже могли видеть в разделе про рейд. Смысл игры на нем - кататься по флангам и заходить в тыл к противнику, с целью выцепить раненых)
+Mordaunt, III ранг, 280 к. (Играть на морде - особый вид извращений. Имеет низкое хп, броню и вооружение. Единственное преимущество это хорошая скорость, маневр и большой экипаж. Смысл игры на нем - подгадать момент, подлететь и забордить незадачливого противника)
+Bellona, III ранг, 535 к. (Классический тяж)
+Kobukson, III ранг, 410 к. (Классическая мортира. Имеет расположение мортир одновременно на носу и корме)
+Deadfish, III ранг, 15 кк. (Вы когда-нибудь хотели почувствовать себя неуязвимым?. Чтож 8 брони и 3 к. хп в стоке обеспечат вас этим чувством. При таких значениях брони обладает отличным вооружением, и маневром больше чем у белонны. Ну и на сладкое водоизмещение почти в 5 тысяч тонн, позволяющие взять на таран порт)) )
+Prins Willem, III ранг, 1600 рублей. (То же самое что и мордаунт, только лучше)
+------ II ранг ------
+Ingermanland, II ранг, 425 к. (Описание вы моги наблюдать в разделе про рейды. Смысл игры на нем - кататься по флангам и заходить в тыл к противнику, с целью выцепить раненых)
+Adventure, II ранг, 720 к. (Классическая мортира)
+Redutable, II ранг, 1 кк. (Классический тяж)
+Octopus, II ранг, 100 кк. (Описание вы моги наблюдать в разделе про рейды. В массовых замесах довольно живучий, и вносит хороший урон)
+Firestorm, II ранг, 2600 рублей. (Описание вы моги наблюдать в разделе про рейды, при прямых руках очень живучий. Фаер хорошо себя чувствует при любых раскладах боя)
+Neptuno, II ранг, 2500 рублей. (Описание вы моги наблюдать в разделе про рейды, смысл игры на нем - бордить все живое)
+------ I ранг ------
+12 Apostolov, I ранг, 3,7 кк. (Классический тяж)
+La Royale, I ранг, 2 кк. (Классическая мортира)
+Sovereign, I ранг, 10 кк. (Описание было в разделе про рейд)
+De Zeven Provincien, I ранг, 2800 рублей. (Описание вы могли наблюдать в разделе про рейды)
+Santisima Trinidad, I ранг, 2900 рублей. (Классический тяж)</pre>
+                                    </details>
+                                    <details class="bg-slate-800 rounded-lg border border-gray-700 p-4">
+                                        <summary class="cursor-pointer font-semibold text-yellow-300">5. ПОРТОВЫЕ БОИ</summary>
+                                        <pre class="mt-2 text-gray-200 whitespace-pre-wrap">Эта категория подразумевает корабли наиболее эффективные для участия в портовых боях.
+Расшифровка определений -
+Т. - Тяжелый корабль, основа армии, используются в больших количествах.
+М. - Мортирный корабль, используются в небольших количествах, как стратегическое оружие.
+С. - Корабль особого назначения.
+------ VI ранг ------
+Shunsen, VI ранг, 450 к. Т.
+Golden Apostle, VI ранг, 150 к. М.
+------ V ранг ------
+San Martin, V ранг, 95 к. Т.
+Eagle, V ранг, 600 рублей. М.
+------ IV ранг ------
+Constitution, IV ранг, 240 к. Т.
+Devourer, IV ранг, 3.3 кк. C.
+Red Arrow, IV ранг, 1200 рублей. С.
+Sparrow, IV ранг, 1000 рублей. М.
+------ III ранг ------
+Bellona, III ранг, 535 к. Т.
+Deadfish, III ранг, 15 кк. C.
+Kobukson, III ранг, 410 к. М.
+------ II ранг ------
+Redutable, II ранг, 1 кк. Т.
+Octopus, II ранг, 100 кк. С.
+Kobukson, III ранг, 410 к. М.
+Sparrow, IV ранг, 1000 рублей. М.
+------ I ранг ------
+12 Apostolov, I ранг, 3,7 кк. Т.
+Santisima Trinidad, I ранг, 2900 рублей. Т.
+Sovereign, I ранг, 10 кк. С.
+La Royale, I ранг, 2 кк. М.</pre>
+                                    </details>
+                                </div>
+                            </article>
+                        `;
+                    } else if (guide === 'escarda-bots') {
+                        html = `
+                            <article class="p-6 rounded-xl shadow-lg border border-gray-700" style="background-color: var(--color-secondary-dark);">
+                                <h3 class="text-3xl font-bold mb-3" style="color: var(--color-accent-gold);">Гайд: БОТЫ В ЭСКАРДУ</h3>
+                                <p class="text-gray-300 mb-4">Кратко о том, как собрать собственную эскадру ботов, какие корабли лучше захватывать и когда это имеет смысл.</p>
+                                <div class="space-y-4">
+                                    <details open class="bg-slate-800 rounded-lg border border-gray-700 p-4">
+                                        <summary class="cursor-pointer font-semibold text-yellow-300">Что такое привязные боты?</summary>
+                                        <p class="text-gray-200 mt-2"><span class="font-semibold">Привязные</span> — это твоя личная эскадра (до <span class="text-yellow-300">3 кораблей</span>), которые следуют за тобой и помогают в бою и перевозках.</p>
+                                    </details>
+
+                                    <details class="bg-slate-800 rounded-lg border border-gray-700 p-4">
+                                        <summary class="cursor-pointer font-semibold text-yellow-300">Как их сделать?</summary>
+                                        <p class="text-gray-200 mt-2">Нужен навык <span class="text-yellow-300">«Капитан эскадры»</span> — стоит <span class="text-yellow-300">2 очка</span>. После взятия навыка можно нанимать/привязывать захваченные корабли в свою эскадру.</p>
+                                    </details>
+
+                                    <details class="bg-slate-800 rounded-lg border border-gray-700 p-4">
+                                        <summary class="cursor-pointer font-semibold text-yellow-300">Хочу большой трюм</summary>
+                                        <div class="text-gray-200 mt-2 space-y-2">
+                                            <p>Ищем <span class="font-semibold">торговые корабли</span> в красной зоне и захватываем их через <span class="font-semibold">подкуп</span> и абордаж.</p>
+                                            <p class="text-gray-300">Топ кандидаты с большим трюмом:</p>
+                                            <ul class="list-disc list-inside space-y-1">
+                                                <li><span class="font-semibold">Принц Вильям</span> — 6000 ХП; трюм: 10000 (мирный), <span class="whitespace-nowrap">22222</span> (торговый/пиратский).</li>
+                                                <li><span class="font-semibold">Корона / Мордаунт</span> — 4800 ХП; трюм: 8500 (мирный), <span class="whitespace-nowrap">18889</span> (торговый/пиратский).</li>
+                                            </ul>
+                                        </div>
+                                    </details>
+
+                                    <details class="bg-slate-800 rounded-lg border border-gray-700 p-4">
+                                        <summary class="cursor-pointer font-semibold text-yellow-300">Хочу подмогу (звёздочки 1)</summary>
+                                        <div class="text-gray-200 mt-2 space-y-2">
+                                            <p>Можно также подкупать и брать на абордаж боевые корабли со звёздочкой 1 — они неплохо усиливают эскадру.</p>
+                                            <ul class="list-disc list-inside space-y-1">
+                                                <li><span class="font-semibold">Суверены</span> — 1, встречаются торговые и пиратские. Сильные, но прожорливы: тратят много мортирных ядер и ХП.</li>
+                                                <li><span class="font-semibold">Полтавы</span> — лучше пиратские: быстрые, часто стреляют, но мало ХП.</li>
+                                                <li><span class="font-semibold">12 Апостолов</span> — 1, пушек много; попадёт — и ладно. На текущий момент — сомнительная польза.</li>
+                                            </ul>
+                                            <p class="text-gray-400 text-sm">Примечание: эффективность конкретных кораблей может меняться от патча к патчу.</p>
+                                        </div>
+                                    </details>
+                                </div>
+                            </article>
+                        `;
+                    } else if (guide === 'imperial-flagships') {
+                        html = `
+                            <article class="p-6 rounded-xl shadow-lg border border-gray-700" style="background-color: var(--color-secondary-dark);">
+                                <h3 class="text-3xl font-bold mb-3" style="color: var(--color-accent-gold);">Информация о Имперских флагманах</h3>
+                                <p class="text-gray-300 mb-4">Ниже прикреплено изображение со сводной информацией.</p>
+                                <div class="flex justify-center">
+                                    <img class="guide-photo-single max-w-full max-h-[60vh] rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="18" alt="Имперские флагманы">
+                                </div>
+                                <p class="text-gray-400 text-sm mt-2 text-center">Нажмите на изображение, чтобы открыть в полноэкранном режиме.</p>
+                            </article>
+                        `;
+                    } else if (guide === 'mortars') {
+                        html = `
+                            <article class="p-6 rounded-xl shadow-lg border border-gray-700" style="background-color: var(--color-secondary-dark);">
+                                <h3 class="text-3xl font-bold mb-3" style="color: var(--color-accent-gold);">Мортиры</h3>
+                                <div class="flex justify-center">
+                                    <img class="guide-photo-single max-w-full max-h-[60vh] rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="19" alt="Мортиры — справка">
+                                </div>
+                                <p class="text-gray-400 text-sm mt-2 text-center">Нажмите на изображение, чтобы открыть в полноэкранном режиме.</p>
+                            </article>
+                        `;
+                    } else if (guide === 'artillery') {
+                        html = `
+                            <article class="p-6 rounded-xl shadow-lg border border-gray-700" style="background-color: var(--color-secondary-dark);">
+                                <h3 class="text-3xl font-bold mb-3" style="color: var(--color-accent-gold);">Артиллерийское дело</h3>
+                                <div class="flex justify-center">
+                                    <img class="guide-photo-single max-w-full max-h-[60vh] rounded border border-gray-700 bg-slate-900 cursor-pointer" data-num="20" alt="Артиллерийское дело — сводка">
+                                </div>
+                                <p class="text-gray-400 text-sm mt-2 text-center">Нажмите на изображение, чтобы открыть в полноэкранном режиме.</p>
+                            </article>
+                        `;
+                    } else if (guide === 'tactics') {
+                        html = `
+                            <article class="p-6 rounded-xl shadow-lg border border-gray-700" style="background-color: var(--color-secondary-dark);">
+                                <h3 class="text-3xl font-bold mb-3" style="color: var(--color-accent-gold);">Тактика и маневры</h3>
+                                <p class="text-gray-300 mb-4">Подборка схем и тактических приёмов. Все изображения кликабельны.</p>
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    ${[21,22,23,24].map((n, i) => `
+                                        <img class=\"tactics-thumb w-full h-56 object-cover rounded border border-gray-700 bg-slate-900 cursor-pointer\" data-idx=\"${i+1}\" data-num=\"${n}\" alt=\"Тактика #${i+1}\">
+                                    `).join('')}
+                                </div>
+                                <p class="text-gray-400 text-sm mt-2 text-center">Нажмите на изображение, чтобы открыть в полноэкранном режиме.</p>
+                            </article>
+                        `;
+                    } else if (guide === 'trade') {
+                        html = `
+                            <article class="p-6 rounded-xl shadow-lg border border-gray-700" style="background-color: var(--color-secondary-dark);">
+                                <h3 class="text-3xl font-bold mb-3" style="color: var(--color-accent-gold);">Гайд: ТОРГОВЛЯ</h3>
+                                <p class="text-gray-300 mb-4">В этом руководстве — как делать деньги на торговле. Вас ждут: биржевые махинации, погони, интриги, расследования и, конечно же, ковры!</p>
+                                <div class="space-y-4">
+                                    <details open class="bg-slate-800 rounded-lg border border-gray-700 p-4">
+                                        <summary class="cursor-pointer font-semibold text-yellow-300">Есть два стула…</summary>
+                                        <p class="text-gray-200 mt-2">Первый стул — торговля с ботом (два пути). Второй стул — торговля через рынок и регионы.</p>
+                                    </details>
+
+                                    <details class="bg-slate-800 rounded-lg border border-gray-700 p-4">
+                                        <summary class="cursor-pointer font-semibold text-yellow-300">Торговля с ботом: заработок на разнице цен</summary>
+                                        <div class="text-gray-200 mt-2 space-y-2">
+                                            <p>Пример: в порту A дерево стоит 2 золота, а в порту Б — 4. Покупаем в A, продаём в Б, разницу — в карман. Чем больше трюм — тем больше навар.</p>
+                                            <p>Алгоритм: берём самый вместительный корабль, идём в Таверну → «Торговые маршруты». Игра предложит выгодные варианты. Пример: на «Короне» (63 т трюма) маршрут Шархат → Масадора даёт ≈20k чистой прибыли.</p>
+                                            <p class="text-gray-400">Способ не самый прибыльный, но очень простой и стабильный.</p>
+                                        </div>
+                                    </details>
+
+                                    <details class="bg-slate-800 rounded-lg border border-gray-700 p-4">
+                                        <summary class="cursor-pointer font-semibold text-yellow-300">Торговля с ботом: заработок на рынке</summary>
+                                        <div class="text-gray-200 mt-2 space-y-2">
+                                            <p>В игре есть 3 региона. Покупая товары в одном регионе, их можно выгодно продать в другом.</p>
+                                            <div class="flex flex-wrap gap-2 mt-1">
+                                                <span class="px-2 py-1 rounded bg-sky-700/40 border border-sky-500/40">Арабский регион — голубой</span>
+                                                <span class="px-2 py-1 rounded bg-green-700/40 border border-green-500/40">Южный регион — зелёный</span>
+                                                <span class="px-2 py-1 rounded bg-violet-700/40 border border-violet-500/40">Северный регион — фиолетовый</span>
+                                            </div>
+                                            <p>Маршрут: объезжаем порты региона, скупаем товары на рынке. Когда трюм полон — везём в указанное стрелками место на карте (регион-покупатель) и продаём дороже.</p>
+                                            <p>Профит сильно зависит от трюма. На «Короне» (63 т) выходит несколько сотен тысяч. Северные товары обычно менее рентабельны — можно игнорировать.</p>
+                                        </div>
+                                    </details>
+                                </div>
+                            </article>
+                        `;
+                    } else if (guide === 'consumables') {
+                        html = `
+                            <article class="p-6 rounded-xl shadow-lg border border-gray-700" style="background-color: var(--color-secondary-dark);">
+                                <h3 class="text-3xl font-bold mb-3" style="color: var(--color-accent-gold);">Гайд: Расходные Предметы</h3>
+                                <p class="text-gray-300 mb-4">В этом руководстве я расскажу вам про расходники, и с чем их едят.</p>
+                                <div class="space-y-4">
+                                    <details open class="bg-slate-800 rounded-lg border border-gray-700 p-4">
+                                        <summary class="cursor-pointer font-semibold text-yellow-300">Список хороших расходников</summary>
+                                        <ul class="mt-2 text-gray-200 list-disc list-inside space-y-1">
+                                            <li><span class="font-semibold">Бронзовые заплатки / Заплатки из обломков</span> — дают временную прочность, считай что носишь в кармане дополнительное ХП.</li>
+                                            <li><span class="font-semibold">Большие добавочные паруса</span> — дают дополнительные 1.5 узла скорости и рывок, чтобы быстро разорвать дистанцию или взять на абордаж.</li>
+                                            <li><span class="font-semibold">Большие пластины</span> — дают броню и защищают от микропожаров; очень помогают жить под фокусом и в дуэлях.</li>
+                                            <li><span class="font-semibold">Дымовая завеса</span> — снижает весь входящий урон на 25%; прожимать под фокусом и в дуэлях.</li>
+                                            <li><span class="font-semibold">Сытный паёк</span> — повышает скорость ремонта, перезарядки предметов и маневренность корабля; в основном для ускоренного ремонта.</li>
+                                        </ul>
+                                    </details>
+                                    <details class="bg-slate-800 rounded-lg border border-gray-700 p-4">
+                                        <summary class="cursor-pointer font-semibold text-yellow-300">Список специфичных расходников</summary>
+                                        <ul class="mt-2 text-gray-200 list-disc list-inside space-y-1">
+                                            <li><span class="font-semibold">Бронзовый ремонт-набор</span> — ремонтирует ~230 HP и, что важнее, 15% парусов. Во время ремонта корабль получает больше урона; используется преимущественно для ремонта парусов, чтобы уходить от погони.</li>
+                                            <li><span class="font-semibold">Горн</span> — добавляет 5% временной прочности всем союзникам в эскадре; используется практически исключительно на ПБ.</li>
+                                            <li><span class="font-semibold">Жёлтая сигнальная ракета</span> — даёт +1 узел скорости; полезна в погонях.</li>
+                                            <li><span class="font-semibold">Чёрный / Белый / Красный порох</span> — используется как баф для мортир.</li>
+                                        </ul>
+                                    </details>
+                                </div>
+                            </article>
+                        `;
+                    } else if (guide === 'mines') {
+                        html = `
+                            <article class="p-6 rounded-xl shadow-lg border border-gray-700" style="background-color: var(--color-secondary-dark);">
+                                <h3 class="text-3xl font-bold mb-3" style="color: var(--color-accent-gold);">Гайд: РУДНИКИ</h3>
+                                <p class="text-gray-300 mb-4">В игре существует множество рудников, но большая часть из них бесполезны. Здесь — как не быть обманутым и использовать рудники с максимальной выгодой.</p>
+                                <div class="space-y-4">
+                                    <details open class="bg-slate-800 rounded-lg border border-gray-700 p-4">
+                                        <summary class="cursor-pointer font-semibold text-yellow-300">Типы рудников и что они добывают</summary>
+                                        <p class="text-gray-200 mt-2">Всего в игре 9 типов рудников. Они могут производить: смолу, ром, лёд, медь, железо, уголь, дерево и марки.</p>
+                                    </details>
+                                    <details class="bg-slate-800 rounded-lg border border-gray-700 p-4">
+                                        <summary class="cursor-pointer font-semibold text-yellow-300">Уровни и снабжение</summary>
+                                        <ul class="text-gray-200 mt-2 list-disc list-inside space-y-1">
+                                            <li>У рудника есть 4 уровня. Чем выше уровень — тем быстрее добыча.</li>
+                                            <li>Ур.1–2 улучшаются за золото. Ур.3–4 — за золото, переборки и пластины.</li>
+                                            <li>Начиная с ур.3 рудник требует обеспечения порционами для работы.</li>
+                                        </ul>
+                                    </details>
+                                    <details class="bg-slate-800 rounded-lg border border-gray-700 p-4">
+                                        <summary class="cursor-pointer font-semibold text-yellow-300">Дистанционный лут</summary>
+                                        <p class="text-gray-200 mt-2">Ресурсы с рудников можно собирать дистанционно при наличии личного острова с аванпостом. Нажмите на иконку острова и за 1k рабочего ресурса можно дистанционно облутать рудники в пределах 7000 дистанции.</p>
+                                    </details>
+                                    <details class="bg-slate-800 rounded-lg border border-gray-700 p-4">
+                                        <summary class="cursor-pointer font-semibold text-yellow-300">Лимиты рудников</summary>
+                                        <p class="text-gray-200 mt-2">Со старта доступны 2 рудника. Перк <span class="text-yellow-300">«Найм рабочих»</span> увеличивает лимит до 4, а <span class="text-yellow-300">«Строительная грамота»</span> — до 6.</p>
+                                    </details>
+                                    <details class="bg-slate-800 rounded-lg border border-gray-700 p-4">
+                                        <summary class="cursor-pointer font-semibold text-yellow-300">Оптимальный набор рудников</summary>
+                                        <div class="text-gray-200 mt-2 space-y-2">
+                                            <p>Берём перк «Найм рабочих» и строим на личном острове аванпост. Нас интересуют следующие рудники (все качаем до 4 уровня):</p>
+                                            <ul class="list-disc list-inside space-y-1">
+                                                <li>Железный рудник</li>
+                                                <li>Железный рудник</li>
+                                                <li>Угольный рудник</li>
+                                                <li>Медный рудник</li>
+                                            </ul>
+                                            <p class="text-gray-300">Стоимость до ур.4 (на один рудник): 16 переборок, 7 пластин, 10k золота.</p>
+                                            <p class="text-gray-300">Содержание (на ур.4): 24 раба и 96 порционов/сутки. Можно закинуть запас на месяц вперёд.</p>
+                                            <ul class="list-disc list-inside space-y-1">
+                                                <li>Железные рудники: ~7 872 железной руды/сутки каждый.</li>
+                                                <li>Угольный рудник: ~1 056 угля/сутки.</li>
+                                                <li>Медный рудник: ~480 медной руды/сутки.</li>
+                                            </ul>
+                                        </div>
+                                    </details>
+                                    <details class="bg-slate-800 rounded-lg border border-gray-700 p-4">
+                                        <summary class="cursor-pointer font-semibold text-yellow-300">Плавка и применение ресурсов</summary>
+                                        <p class="text-gray-200 mt-2">Железную/медную руду переплавляем: получаем железо и медь. Железо — для постройки кораблей, медь — для бронзовых заплаток, уголь — топливо для переплавки.</p>
+                                    </details>
+                                    <details class="bg-slate-800 rounded-lg border border-gray-700 p-4">
+                                        <summary class="cursor-pointer font-semibold text-yellow-300">Марочные фермы (за картой)</summary>
+                                        <div class="text-gray-200 mt-2 space-y-2">
+                                            <p>Существуют рудники, производящие марки (нужны для постройки кораблей). Их 4 штуки, расположены за картой, в бескрайнем море. Эти фермы не занимают обычные слоты рудников. Ниже — примеры и фото.</p>
+                                            <div class="grid md:grid-cols-3 gap-3">
+                                                <div class="rounded overflow-hidden">
+                                                    <img class="marks-thumb w-full h-40 object-cover rounded border border-gray-700 bg-slate-900 cursor-pointer" data-idx="1" data-num="15" alt="Марочная ферма #1">
+                                                </div>
+                                                <div class="rounded overflow-hidden">
+                                                    <img class="marks-thumb w-full h-40 object-cover rounded border border-gray-700 bg-slate-900 cursor-pointer" data-idx="2" data-num="16" alt="Марочная ферма #2">
+                                                </div>
+                                                <div class="rounded overflow-hidden">
+                                                    <img class="marks-thumb w-full h-40 object-cover rounded border border-gray-700 bg-slate-900 cursor-pointer" data-idx="3" data-num="17" alt="Марочная ферма #3">
+                                                </div>
+                                            </div>
+                                            <p class="text-gray-400 text-sm">Нажмите на фото, чтобы открыть в полноэкранном режиме.</p>
+                                            <p class="text-gray-300">Ниже — два рабочих сценария:</p>
+                                            <div class="bg-slate-900 rounded p-4 border border-gray-700">
+                                                <h4 class="font-bold text-yellow-300 mb-2">Способ для мазохистов</h4>
+                                                <p>Качаем до ур.4 и снабжаем 96 порцион ов/сутки. Раз в два дня объезжаем рудники и собираем марки. Минус — порционы приходится возить без PvP-защиты. Выход: ~840 марок с 4 рудников раз в 2 дня.</p>
+                                            </div>
+                                            <div class="bg-slate-900 rounded p-4 border border-gray-700 mt-3">
+                                                <h4 class="font-bold text-yellow-300 mb-2">Способ для лентяев</h4>
+                                                <p>Качаем до ур.4 и берём перк «Самоснабжение». Ездим раз в неделю. Обязательно лутать под военным флагом для +20%, затем «убиваемся» об скалу — марки не тонут. С одного рудника получается ~210 марок; суммарно ~840 марок/неделю (≈ полмиллиона золотом).</p>
+                                            </div>
+                                        </div>
+                                    </details>
+                                </div>
+                            </article>
+                        `;
+                    } else if (guide === 'specialcrew') {
+                        html = `
+                            <article class="p-6 rounded-xl shadow-lg border border-gray-700" style="background-color: var(--color-secondary-dark);">
+                                <h3 class="text-3xl font-bold mb-3" style="color: var(--color-accent-gold);">Гайд: СПЕЦИАЛЬНЫЙ ЭКИПАЖ</h3>
+                                <p class="text-gray-300 mb-4">В игре множество членов специального экипажа. Большая часть — мусор, но некоторые весьма полезны. Ниже — где добывать и кого брать.</p>
+                                <div class="space-y-4">
+                                    <details open class="bg-slate-800 rounded-lg border border-gray-700 p-4">
+                                        <summary class="cursor-pointer font-semibold text-yellow-300">Способы получения</summary>
+                                        <ul class="mt-2 text-gray-200 list-disc list-inside space-y-2">
+                                            <li><span class="font-semibold">Режимы</span>: лутайте обломки противников — с некоторым шансом там будет спец. экипаж. Рекомендуется спец <span class="text-yellow-300">«Мореплаватель»</span> — повышает шанс найти других спецов в режимах. Эффективность ≈ <span class="text-yellow-300">~5 спецов за режим</span>.</li>
+                                            <li><span class="font-semibold">Личный остров → Таверна</span>: меняйте рабочий ресурс на спецов. За <span class="text-yellow-300">270 рабов</span> восполняется ~4000 ресурса острова → <span class="text-yellow-300">4 спеца</span>.</li>
+                                        </ul>
+                                    </details>
+                                    <div class="bg-slate-900 rounded-lg border border-gray-700 p-4">
+                                        <p class="text-gray-200"><span class="font-semibold">Пер к «Правая рука»</span> добавляет <span class="text-yellow-300">+1 слот</span> для спец. экипажа — крайне полезно.</p>
+                                    </div>
+                                    <details class="bg-slate-800 rounded-lg border border-gray-700 p-4">
+                                        <summary class="cursor-pointer font-semibold text-yellow-300">Категории и самые полезные</summary>
+                                        <p class="text-gray-200 mt-2">Категории: Пираты, Моряки, Военные, Авантюристы. Ниже — ключевые (🔥 — обязатель к получению):</p>
+                                        <div class="grid md:grid-cols-2 gap-4 mt-3">
+                                            <div>
+                                                <h4 class="font-bold text-yellow-300 mb-1">Пираты</h4>
+                                                <ul class="text-gray-200 list-disc list-inside space-y-1">
+                                                    <li>Корсар — Опыт персонажа +6%</li>
+                                                    <li>Писарь — Опыт в корабль и апгрейды +20%</li>
+                                                    <li>Вербовщик — Лимит для подобранной команды в море +10</li>
+                                                    <li>Старший врач — Лечение экипажа после абордажа +20%</li>
+                                                    <li>Пороховая обезьяна — Скорость перезарядки фальконет +20%</li>
+                                                </ul>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-bold text-yellow-300 mb-1">Моряки</h4>
+                                                <ul class="text-gray-200 list-disc list-inside space-y-1">
+                                                    <li>🔥 Старпом — Набор скорости +0.2% за каждого матроса</li>
+                                                    <li>Парусный — Скорость +4%</li>
+                                                    <li>🔥 Столяр — Скорость ремонта за каждого матроса +0.3%</li>
+                                                    <li>Суперкарго — Штраф от перегруза -30%</li>
+                                                    <li>Рыболов — Добыча китов и рыбы +0.5% за каждого абордажника</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </details>
+                                </div>
+                            </article>
+                        `;
+                    } else if (guide === 'map') {
+                        html = `
+                            <article class="p-4 sm:p-6 rounded-xl shadow-lg border border-gray-700" style="background-color: var(--color-secondary-dark);">
+                                <h3 class="text-3xl font-bold mb-4" style="color: var(--color-accent-gold);">Интерактивная Карта</h3>
+                                <div class="flex flex-wrap gap-2 mb-3 items-center text-sm">
+                                    <button id="map-reset-btn" class="px-4 py-1.5 rounded border border-gray-600 hover:border-yellow-400">Сброс</button>
+                                    <button id="map-fit-btn" class="px-4 py-1.5 rounded border border-gray-600 hover:border-yellow-400">По размеру</button>
+                                    <button id="map-fullscreen-btn" class="px-4 py-1.5 rounded border border-gray-600 hover:border-yellow-400">Полный экран</button>
+                                    <button id="map-zoom-in-btn" class="px-3 py-1.5 rounded border border-gray-600 hover:border-yellow-400">+</button>
+                                    <button id="map-zoom-out-btn" class="px-3 py-1.5 rounded border border-gray-600 hover:border-yellow-400">−</button>
+                                    <label class="flex items-center gap-1 ml-2">Зум
+                                        <input id="map-zoom-range" type="range" min="20" max="800" value="100" class="accent-yellow-400 cursor-pointer">
+                                    </label>
+                                    <button id="map-toggle-ui" class="px-3 py-1.5 rounded border border-gray-600 hover:border-yellow-400">UI</button>
+                                </div>
+                                <p class="text-gray-400 text-xs mb-2">Колесо / pinch: зум · Drag: перемещение · Двойной клик: увеличить · Shift+двойной клик: уменьшить · Стрелки: пан · +/-: зум</p>
+                                <div id="map-stage" class="relative w-full h-[75vh] sm:h-[80vh] overflow-hidden rounded-lg border border-gray-700 bg-slate-900 touch-none select-none">
+                                    <img id="map-image" alt="Карта мира" class="absolute top-0 left-0 will-change-transform" data-num="94" />
+                                    <canvas id="map-minimap" width="180" height="120" class="absolute right-2 bottom-2 bg-black/40 backdrop-blur-sm rounded border border-gray-600"></canvas>
+                                </div>
+                            </article>
+                        `;
+                    }
+                    container.innerHTML = html;
+
+                    // Инициализация изображений/галерей для конкретных гайдов
+                    if (guide === 'mines') {
+                        const thumbs = container.querySelectorAll('.marks-thumb');
+                        if (thumbs.length) {
+                            const exts = ['jpg','png','webp'];
+                            lightboxState.items = [];
+                            thumbs.forEach(img => {
+                                const num = img.getAttribute('data-num');
+                                const idx = parseInt(img.getAttribute('data-idx'), 10) || 0;
+                                let attempt = 0;
+                                img.src = `${num}.${exts[attempt]}`;
+                                img.onerror = () => {
+                                    attempt++;
+                                    if (attempt < exts.length) img.src = `${num}.${exts[attempt]}`;
+                                };
+                                img.onload = () => {
+                                    const src = img.currentSrc || img.src;
+                                    const pos = lightboxState.items.findIndex(x => x.index === idx);
+                                    if (pos === -1) {
+                                        lightboxState.items.push({ index: idx, src });
+                                        lightboxState.items.sort((a,b) => a.index - b.index);
+                                    } else {
+                                        lightboxState.items[pos].src = src;
+                                    }
+                                };
+                                img.addEventListener('click', () => openLightboxByIndex(idx));
+                            });
+                        }
+                    } else if (['imperial-flagships','mortars','artillery'].includes(guide)) {
+                        const img = container.querySelector('img.guide-photo-single');
+                        if (img) {
+                            const exts = ['jpg','png','webp'];
+                            let attempt = 0;
+                            const num = img.getAttribute('data-num');
+                            lightboxState.items = [];
+                            img.src = `${num}.${exts[attempt]}`;
+                            img.onerror = () => {
+                                attempt++;
+                                if (attempt < exts.length) img.src = `${num}.${exts[attempt]}`;
+                            };
+                            img.onload = () => {
+                                const src = img.currentSrc || img.src;
+                                lightboxState.items = [{ index: 1, src }];
+                            };
+                            img.addEventListener('click', () => openLightboxByIndex(1));
+                        }
+                    } else if (guide === 'tactics') {
+                        const thumbs = container.querySelectorAll('img.tactics-thumb');
+                        if (thumbs.length) {
+                            const exts = ['jpg','png','webp'];
+                            lightboxState.items = [];
+                            thumbs.forEach(img => {
+                                const num = img.getAttribute('data-num');
+                                const idx = parseInt(img.getAttribute('data-idx'), 10) || 0;
+                                let attempt = 0;
+                                img.src = `${num}.${exts[attempt]}`;
+                                img.onerror = () => {
+                                    attempt++;
+                                    if (attempt < exts.length) img.src = `${num}.${exts[attempt]}`;
+                                };
+                                img.onload = () => {
+                                    const src = img.currentSrc || img.src;
+                                    const pos = lightboxState.items.findIndex(x => x.index === idx);
+                                    if (pos === -1) {
+                                        lightboxState.items.push({ index: idx, src });
+                                        lightboxState.items.sort((a,b) => a.index - b.index);
+                                    } else {
+                                        lightboxState.items[pos].src = src;
+                                    }
+                                };
+                                img.addEventListener('click', () => openLightboxByIndex(idx));
+                            });
+                        }
+                    }
+                }
+
+                // ------------------------
+                // ПБ: Галерея 1..14 + лайтбокс
+                // ------------------------
+
+    // --- ПБ: Галерея 1..14 с лайтбоксом ---
+
+        function initPBGallery(count = 14) {
+            const gallery = document.getElementById('pb-gallery');
+            if (!gallery) return;
+            lightboxState.items = [];
+            // Создаем карточки-миниатюры
+            for (let i = 1; i <= count; i++) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'relative group rounded-lg overflow-hidden border border-gray-700 bg-slate-900 hover:border-yellow-400 transition cursor-pointer';
+
+                const img = document.createElement('img');
+                img.className = 'w-full h-28 sm:h-32 md:h-36 object-cover block';
+                // Попытки расширений
+                const exts = ['jpg','png','webp'];
+                let attempt = 0;
+                img.alt = `Скриншот #${i}`;
+                img.src = `${i}.${exts[attempt]}`;
+                img.onerror = () => {
+                    attempt++;
+                    if (attempt < exts.length) {
+                        img.src = `${i}.${exts[attempt]}`;
+                    } else {
+                        // Если не нашли файл — скрываем карточку
+                        wrapper.style.display = 'none';
+                    }
+                };
+                img.onload = () => {
+                    // Сохраняем фактический src в массив для лайтбокса
+                    const existing = lightboxState.items.findIndex(x => x.index === i);
+                    const src = img.currentSrc || img.src;
+                    if (existing === -1) {
+                        lightboxState.items.push({ index: i, src });
+                        // поддержим порядок
+                        lightboxState.items.sort((a,b) => a.index - b.index);
+                    } else {
+                        lightboxState.items[existing].src = src;
+                    }
+                };
+
+                wrapper.appendChild(img);
+
+                // Оверлей при наведении
+                const overlay = document.createElement('div');
+                overlay.className = 'absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition';
+                overlay.innerHTML = '<span class="text-yellow-300 font-semibold">Открыть</span>';
+                wrapper.appendChild(overlay);
+
+                wrapper.addEventListener('click', () => openLightboxByIndex(i));
+
+                gallery.appendChild(wrapper);
+            }
+        }
+
+        function ensureLightboxRoot() {
+            let root = document.getElementById('lightbox-root');
+            if (root) return root;
+            root = document.createElement('div');
+            root.id = 'lightbox-root';
+            root.className = 'fixed inset-0 hidden flex items-center justify-center bg-black/80 z-50';
+            root.innerHTML = `
+                <button id="lb-close" class="absolute top-4 right-4 text-white text-2xl" aria-label="Закрыть">✕</button>
+                <button id="lb-prev" class="absolute left-4 md:left-8 text-white text-3xl select-none" aria-label="Предыдущий">‹</button>
+                <img id="lb-image" class="max-h-[85vh] max-w-[90vw] rounded shadow-2xl border border-gray-700" alt="Просмотр">
+                <button id="lb-next" class="absolute right-4 md:right-8 text-white text-3xl select-none" aria-label="Следующий">›</button>
+            `;
+            document.body.appendChild(root);
+            // События
+            root.querySelector('#lb-close').onclick = closeLightbox;
+            root.querySelector('#lb-prev').onclick = () => stepLightbox(-1);
+            root.querySelector('#lb-next').onclick = () => stepLightbox(1);
+            root.addEventListener('click', (e) => {
+                if (e.target === root) closeLightbox();
+            });
+            return root;
+        }
+
+        function openLightboxByIndex(actualIndex) {
+            // Найдем индекс в массиве items по реальному номеру картинки
+            const pos = lightboxState.items.findIndex(x => x.index === actualIndex);
+            if (pos === -1) return;
+            openLightboxAt(pos);
+        }
+
+        function openLightboxAt(pos) {
+            const root = ensureLightboxRoot();
+            lightboxState.index = pos;
+            lightboxState.open = true;
+            updateLightboxImage();
+            root.classList.remove('hidden');
+            document.addEventListener('keydown', lightboxKeyHandler);
+        }
+
+        function closeLightbox() {
+            const root = document.getElementById('lightbox-root');
+            if (root) root.classList.add('hidden');
+            lightboxState.open = false;
+            document.removeEventListener('keydown', lightboxKeyHandler);
+        }
+
+        function lightboxKeyHandler(e) {
+            if (!lightboxState.open) return;
+            if (e.key === 'Escape') closeLightbox();
+            if (e.key === 'ArrowRight') stepLightbox(1);
+            if (e.key === 'ArrowLeft') stepLightbox(-1);
+        }
+
+        function stepLightbox(delta) {
+            if (!lightboxState.items.length) return;
+            const len = lightboxState.items.length;
+            lightboxState.index = (lightboxState.index + delta + len) % len;
+            updateLightboxImage();
+        }
+
+        function updateLightboxImage() {
+            const imgEl = document.getElementById('lb-image');
+            if (!imgEl) return;
+            const item = lightboxState.items[lightboxState.index];
+            if (!item) return;
+            imgEl.src = item.src;
+        }
+
+        // --- PvP: Сборки кораблей ---
+        function initPvpPage() {
+            const root = document.getElementById('pvp-builds');
+            if (!root) return;
+
+            // Подгружаем превью кораблей (в summary) без лайтбокса
+            const heroes = root.querySelectorAll('summary img[data-num]');
+            if (heroes && heroes.length) {
+                heroes.forEach(hero => {
+                    const exts = ['jpg','png','webp'];
+                    let attempt = 0;
+                    const num = hero.getAttribute('data-num');
+                    hero.src = `${num}.${exts[attempt]}`;
+                    hero.onerror = () => {
+                        attempt++;
+                        if (attempt < exts.length) hero.src = `${num}.${exts[attempt]}`;
+                    };
+                });
+            }
+
+            // Внутренние изображения билда — кликабельны и открываются в лайтбоксе
+            const detailImages = root.querySelectorAll('details img[data-num]:not(summary img)');
+            if (!detailImages.length) return;
+            const exts = ['jpg','png','webp'];
+            lightboxState.items = [];
+            let counter = 1;
+            detailImages.forEach(img => {
+                const num = img.getAttribute('data-num');
+                let attempt = 0;
+                const idx = counter++;
+                img.src = `${num}.${exts[attempt]}`;
+                img.onerror = () => {
+                    attempt++;
+                    if (attempt < exts.length) img.src = `${num}.${exts[attempt]}`;
+                };
+                img.onload = () => {
+                    const src = img.currentSrc || img.src;
+                    const pos = lightboxState.items.findIndex(x => x.index === idx);
+                    if (pos === -1) {
+                        lightboxState.items.push({ index: idx, src });
+                        lightboxState.items.sort((a,b) => a.index - b.index);
+                    } else {
+                        lightboxState.items[pos].src = src;
+                    }
+                };
+                img.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openLightboxByIndex(idx);
+                });
+            });
+        }
+
+        // --- Интерактивная карта ---
+        function initMapPage() {
+            const img = document.getElementById('map-page-image');
+            const stage = document.getElementById('map-page-stage');
+            if (!img || !stage) return;
+            const minimap = document.getElementById('map-page-minimap');
+            const ctx = minimap?.getContext('2d');
+            const exts = ['jpg','png','webp'];
+            let attempt = 0;
+            const num = img.getAttribute('data-num');
+            img.src = `${num}.${exts[attempt]}`;
+            img.onerror = () => { attempt++; if (attempt < exts.length) img.src = `${num}.${exts[attempt]}`; };
+
+            let scale = 1;
+            let originX = 0;
+            let originY = 0;
+            let isPanning = false;
+            let startX = 0;
+            let startY = 0;
+            let lastTouchDist = 0;
+            let uiHidden = false;
+
+            const range = document.getElementById('map-page-zoom-range');
+            const btnFS = document.getElementById('map-page-fullscreen');
+            const btnUI = document.getElementById('map-page-toggle-ui');
+
+            function clamp() {
+                if (!img.naturalWidth || !img.naturalHeight) return;
+                const sw = stage.clientWidth;
+                const sh = stage.clientHeight;
+                const mapW = img.naturalWidth * scale;
+                const mapH = img.naturalHeight * scale;
+                const maxX = 0 + sw/2;
+                const minX = sw - mapW - sw/2;
+                const maxY = 0 + sh/2;
+                const minY = sh - mapH - sh/2;
+                originX = Math.max(Math.min(originX, maxX), minX);
+                originY = Math.max(Math.min(originY, maxY), minY);
+            }
+
+            function applyTransform() {
+                clamp();
+                img.style.transform = `translate(${originX}px, ${originY}px) scale(${scale})`;
+                if (range) range.value = Math.round(scale * 100);
+                drawMinimap();
+            }
+
+            function fitToStage() {
+                if (!img.naturalWidth || !img.naturalHeight) return;
+                const sw = stage.clientWidth;
+                const sh = stage.clientHeight;
+                const sx = sw / img.naturalWidth;
+                const sy = sh / img.naturalHeight;
+                scale = Math.min(sx, sy);
+                originX = (sw - img.naturalWidth * scale) / 2;
+                originY = (sh - img.naturalHeight * scale) / 2;
+                applyTransform();
+            }
+
+            function zoomAt(factor, cx, cy) {
+                const prevScale = scale;
+                scale = Math.min(8, Math.max(0.2, scale * factor));
+                originX = cx - (cx - originX) * (scale / prevScale);
+                originY = cy - (cy - originY) * (scale / prevScale);
+                applyTransform();
+            }
+
+            function drawMinimap() {
+                if (!ctx || !img.naturalWidth) return;
+                const mw = minimap.width;
+                const mh = minimap.height;
+                ctx.clearRect(0,0,mw,mh);
+                // draw map outline
+                ctx.fillStyle = '#111';
+                ctx.fillRect(0,0,mw,mh);
+                ctx.strokeStyle = '#777';
+                ctx.strokeRect(0,0,mw,mh);
+                // viewport rectangle
+                const sw = stage.clientWidth;
+                const sh = stage.clientHeight;
+                const mapW = img.naturalWidth * scale;
+                const mapH = img.naturalHeight * scale;
+                const normX = -originX / mapW * mw;
+                const normY = -originY / mapH * mh;
+                const viewW = sw / mapW * mw;
+                const viewH = sh / mapH * mh;
+                ctx.strokeStyle = '#FFD700';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(normX, normY, viewW, viewH);
+            }
+
+            img.onload = () => { fitToStage(); };
+
+            stage.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const rect = stage.getBoundingClientRect();
+                const cx = e.clientX - rect.left;
+                const cy = e.clientY - rect.top;
+                zoomAt(e.deltaY < 0 ? 1.1 : 0.9, cx, cy);
+            }, { passive: false });
+
+            stage.addEventListener('mousedown', (e) => {
+                isPanning = true;
+                startX = e.clientX - originX;
+                startY = e.clientY - originY;
+                stage.style.cursor = 'grabbing';
+            });
+            window.addEventListener('mouseup', () => { isPanning = false; stage.style.cursor = 'default'; });
+            window.addEventListener('mousemove', (e) => {
+                if (!isPanning) return;
+                originX = e.clientX - startX;
+                originY = e.clientY - startY;
+                applyTransform();
+            });
+
+            stage.addEventListener('dblclick', (e) => {
+                const rect = stage.getBoundingClientRect();
+                const cx = e.clientX - rect.left;
+                const cy = e.clientY - rect.top;
+                const factor = e.shiftKey ? 0.8 : 1.25;
+                zoomAt(factor, cx, cy);
+            });
+
+            // Keyboard
+            stage.tabIndex = 0;
+            stage.addEventListener('keydown', (e) => {
+                if (['+','='].includes(e.key)) { zoomAt(1.1, stage.clientWidth/2, stage.clientHeight/2); }
+                else if (['-','_'].includes(e.key)) { zoomAt(0.9, stage.clientWidth/2, stage.clientHeight/2); }
+                else if (e.key === 'ArrowLeft') { originX += 40; applyTransform(); }
+                else if (e.key === 'ArrowRight') { originX -= 40; applyTransform(); }
+                else if (e.key === 'ArrowUp') { originY += 40; applyTransform(); }
+                else if (e.key === 'ArrowDown') { originY -= 40; applyTransform(); }
+            });
+
+            // Range slider
+            range?.addEventListener('input', () => {
+                const desired = parseInt(range.value,10)/100;
+                const rect = stage.getBoundingClientRect();
+                zoomAt(desired/scale, rect.width/2, rect.height/2);
+            });
+
+            // Pinch zoom
+            stage.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 2) {
+                    lastTouchDist = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                } else if (e.touches.length === 1) {
+                    isPanning = true;
+                    startX = e.touches[0].clientX - originX;
+                    startY = e.touches[0].clientY - originY;
+                }
+            }, { passive: false });
+            stage.addEventListener('touchmove', (e) => {
+                if (e.touches.length === 2) {
+                    e.preventDefault();
+                    const dist = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    const rect = stage.getBoundingClientRect();
+                    const cx = (e.touches[0].clientX + e.touches[1].clientX)/2 - rect.left;
+                    const cy = (e.touches[0].clientY + e.touches[1].clientY)/2 - rect.top;
+                    if (lastTouchDist) {
+                        zoomAt(dist/lastTouchDist, cx, cy);
+                    }
+                    lastTouchDist = dist;
+                } else if (e.touches.length === 1 && isPanning) {
+                    originX = e.touches[0].clientX - startX;
+                    originY = e.touches[0].clientY - startY;
+                    applyTransform();
+                }
+            }, { passive: false });
+            stage.addEventListener('touchend', () => { if (event.touches.length === 0) { isPanning = false; lastTouchDist = 0; } });
+
+            // Buttons
+            document.getElementById('map-page-reset')?.addEventListener('click', () => { scale = 1; originX = 0; originY = 0; applyTransform(); });
+            document.getElementById('map-page-fit')?.addEventListener('click', () => fitToStage());
+            document.getElementById('map-page-zoom-in')?.addEventListener('click', () => zoomAt(1.2, stage.clientWidth/2, stage.clientHeight/2));
+            document.getElementById('map-page-zoom-out')?.addEventListener('click', () => zoomAt(0.8, stage.clientWidth/2, stage.clientHeight/2));
+            btnFS?.addEventListener('click', () => {
+                if (!document.fullscreenElement) stage.requestFullscreen?.(); else document.exitFullscreen?.();
+            });
+            btnUI?.addEventListener('click', () => {
+                uiHidden = !uiHidden;
+                const controls = [btnFS, btnUI, range, document.getElementById('map-page-reset'), document.getElementById('map-page-fit'), document.getElementById('map-page-zoom-in'), document.getElementById('map-page-zoom-out')];
+                controls.forEach(el => { if (!el) return; el.style.display = uiHidden ? 'none' : ''; });
+            });
+        }
+        
+        // --- ФУНКЦИИ ГИЛЬДИИ ---
+
+        /**
+         * Скроллит страницу к форме заявки на вступление.
+         */
+        function scrollToForm() {
+            document.getElementById('guild-form-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        /**
+         * Обрабатывает отправку формы заявки. Имитирует отправку на почту.
+         * @param {Event} event
+         */
+        function submitApplication(event) {
+            event.preventDefault();
+            const nickname = document.getElementById('nickname').value;
+            const level = document.getElementById('level').value;
+            const experience = document.getElementById('experience').value;
+
+            // Имитация отправки на общую почту (вывод в консоль)
+            console.log("--- ОТПРАВЛЕНА НОВАЯ ЗАЯВКА В ГИЛЬДИЮ ---");
+            console.log(`Никнейм: ${nickname}`);
+            console.log(`Репутация: ${level}`);
+            console.log(`О себе: ${experience}`);
+            console.log("-----------------------------------------");
+            
+            showMessage(`Заявка от Капитана ${nickname} успешно отправлена! Скоро с Вами свяжутся.`, 'success');
+
+            // Очистка формы
+            document.getElementById('guild-application-form').reset();
+        }
+
+    // --- ДОСТУПЫ: РОЛИ ГИЛЬДИИ И PVP ---
+
+        function loadState() {
+            try {
+                const savedRole = localStorage.getItem(STORAGE_KEYS.role);
+                if (savedRole) userRole = savedRole;
+                const savedMissions = localStorage.getItem(STORAGE_KEYS.missions);
+                missions = savedMissions ? JSON.parse(savedMissions) : [];
+            } catch (e) {
+                missions = [];
+            }
+        }
+
+        function saveMissions() {
+            try {
+                localStorage.setItem(STORAGE_KEYS.missions, JSON.stringify(missions));
+            } catch {}
+        }
+
+        function applyRoleUI() {
+            // Показать ссылку на миссии для участника/главы
+            const missionsLink = document.getElementById('missions-link');
+            if (missionsLink) {
+                if (userRole === 'member' || userRole === 'leader') missionsLink.classList.remove('hidden');
+                else missionsLink.classList.add('hidden');
+            }
+            // Сохранить роль
+            try { localStorage.setItem(STORAGE_KEYS.role, userRole); } catch {}
+        }
+
+        // --- МИССИИ: РЕНДЕРИНГ И УПРАВЛЕНИЕ ---
+        function initMissionsPage() {
+            // Роль и доступ к форме
+            const roleBadge = document.getElementById('role-badge');
+            if (roleBadge) {
+                roleBadge.textContent = `Ваша роль: ${userRole === 'leader' ? 'Глава гильдии' : (userRole === 'member' ? 'Участник' : 'Гость')}`;
+            }
+            const createBox = document.getElementById('mission-create');
+            if (createBox) {
+                if (userRole === 'leader') {
+                    createBox.classList.remove('hidden');
+                    const form = document.getElementById('mission-form');
+                    if (form) {
+                        form.onsubmit = submitMission;
+                    }
+                } else {
+                    createBox.classList.add('hidden');
+                }
+            }
+            renderMissionsList();
+        }
+
+        function submitMission(e) {
+            e.preventDefault();
+            if (userRole !== 'leader') { showMessage('Только глава может создавать миссии.', 'error'); return; }
+            const title = document.getElementById('m-title').value.trim();
+            const reward = document.getElementById('m-reward').value.trim();
+            const desc = document.getElementById('m-desc').value.trim();
+            if (!title || !desc) { showMessage('Заполните название и описание.', 'error'); return; }
+            const mission = {
+                id: Date.now().toString(),
+                title, reward, desc,
+                status: 'open',
+                createdAt: new Date().toISOString()
+            };
+            missions.unshift(mission);
+            saveMissions();
+            renderMissionsList();
+            // Очистка формы
+            document.getElementById('mission-form').reset();
+            showMessage('Миссия добавлена.', 'success');
+        }
+
+        function renderMissionsList() {
+            const list = document.getElementById('missions-list');
+            const empty = document.getElementById('missions-empty');
+            if (!list) return;
+            list.innerHTML = '';
+            if (!missions || missions.length === 0) {
+                if (empty) empty.classList.remove('hidden');
+                return;
+            }
+            if (empty) empty.classList.add('hidden');
+            missions.forEach(m => {
+                const card = document.createElement('div');
+                card.className = 'p-4 rounded-lg border border-gray-700 bg-slate-800';
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="text-xl font-bold">${m.title}</h4>
+                        ${m.status === 'completed' ? '<span class="text-green-400 text-sm">Выполнено</span>' : ''}
+                    </div>
+                    <p class="text-gray-300 mb-2">${m.desc}</p>
+                    <p class="text-yellow-300 mb-3">Награда: ${m.reward || '—'}</p>
+                    <div class="flex gap-2">
+                        ${m.status !== 'completed' ? `<button class="gold-button py-1 px-3 rounded" data-action="complete" data-id="${m.id}">${userRole === 'leader' ? 'Отметить выполненной' : 'Выполнено'}</button>` : ''}
+                        ${userRole === 'leader' ? `<button class="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded" data-action="delete" data-id="${m.id}">Удалить</button>` : ''}
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+            // Делегирование событий для кнопок
+            list.onclick = (ev) => {
+                const btn = ev.target.closest('button[data-action]');
+                if (!btn) return;
+                const id = btn.getAttribute('data-id');
+                const action = btn.getAttribute('data-action');
+                if (action === 'complete') completeMission(id);
+                if (action === 'delete') deleteMission(id);
+            };
+        }
+
+        function completeMission(id) {
+            const idx = missions.findIndex(m => m.id === id);
+            if (idx === -1) return;
+            missions[idx].status = 'completed';
+            saveMissions();
+            renderMissionsList();
+            showMessage('Миссия отмечена как выполненная.', 'success');
+        }
+
+        function deleteMission(id) {
+            if (userRole !== 'leader') { showMessage('Удалять миссии может только глава.', 'error'); return; }
+            missions = missions.filter(m => m.id !== id);
+            saveMissions();
+            renderMissionsList();
+            showMessage('Миссия удалена.', 'success');
+        }
+
+        /**
+         * Унифицированная проверка ключа: гильдия (роли) и PvP.
+         */
+        function checkAccessKey() {
+            const inputEl = document.getElementById('secret-key-input');
+            const input = (inputEl?.value || '').trim().toUpperCase();
+
+            if (!input) { showMessage('Введите ключ.', 'error'); return; }
+
+            if (input === 'ADMIRAL') {
+                userRole = 'leader';
+                applyRoleUI();
+                inputEl.value = '';
+                showMessage('Доступ главы активирован. Открыт раздел "Миссии" с возможностью создания заданий.', 'success');
+                return;
+            }
+            if (input === 'SEADOGS') {
+                userRole = 'member';
+                applyRoleUI();
+                inputEl.value = '';
+                showMessage('Доступ участника активирован. Раздел "Миссии" доступен.', 'success');
+                return;
+            }
+            if (input === 'PVPBUILD2024') {
+                document.getElementById('pvp-link').classList.remove('hidden');
+                inputEl.value = '';
+                showMessage('Ключ принят! Раздел "PvP Сборки" разблокирован.', 'success');
+                return;
+            }
+            showMessage('Неверный ключ. Доступ запрещен.', 'error');
+        }
+
+        // --- ФУНКЦИИ КАЛЬКУЛЯТОРА КРАФТА ---
+
+        /**
+         * **ЗАГЛУШКА**: Здесь должна быть реальная формула из Excel-файла.
+         * Эта функция принимает тип предмета и количество, и возвращает список необходимых ресурсов.
+         * @param {string} itemType Тип предмета
+         * @param {number} quantity Количество
+         * @returns {Array<{name: string, required: number}>} Список ресурсов
+         */
+        function calculateResources(itemType, quantity) {
+            const recipes = {
+                'Balka': [
+                    { name: "Древесина", required: 100 },
+                    { name: "Железо", required: 5 }
+                ],
+                'Plastina': [
+                    { name: "Уголь", required: 15 },
+                    { name: "Смола", required: 4 },
+                    { name: "Железо", required: 30 }
+                ],
+                'Pereborka': [
+                    { name: "Смола", required: 1 },
+                    { name: "Железо", required: 70 }
+                ],
+                'Bronza': [
+                    { name: "Железо", required: 20 },
+                    { name: "Медь", required: 10 },
+                    { name: "Уголь", required: 1 }
+                ],
+                'Parusina': [
+                    { name: "Ткань", required: 10 },
+                    { name: "Смола", required: 1 }
+                ]
+            };
+
+            const recipe = recipes[itemType];
+            if (!recipe) {
+                return [];
+            }
+
+            return recipe.map(resource => ({
+                name: resource.name,
+                required: resource.required * quantity
+            }));
+        }
+
+        /**
+         * Обрабатывает расчет крафта при отправке формы.
+         * @param {Event} event
+         */
+        function calculateCraft(event) {
+            event.preventDefault();
+            const quantity = parseInt(document.getElementById('quantity').value, 10);
+            const itemType = document.getElementById('output-item').value;
+            const resultDiv = document.getElementById('craft-result');
+            const resultList = document.getElementById('result-list');
+
+            if (isNaN(quantity) || quantity <= 0) {
+                showMessage("Введите корректное количество (больше нуля).", 'error');
+                return;
+            }
+
+            const requiredResources = calculateResources(itemType, quantity);
+            
+            resultList.innerHTML = ''; // Очистка предыдущих результатов
+
+            if (requiredResources.length === 0) {
+                const li = document.createElement('li');
+                li.className = 'text-gray-400';
+                li.textContent = 'Для этого предмета рецепт не найден.';
+                resultList.appendChild(li);
+            } else {
+                requiredResources.forEach(resource => {
+                    const li = document.createElement('li');
+                    li.className = 'text-gray-200';
+                    li.innerHTML = `<span class="font-bold text-yellow-300">${resource.name}</span>: ${resource.required.toLocaleString()} шт.`;
+                    resultList.appendChild(li);
+                });
+            }
+
+            resultDiv.classList.remove('hidden');
+        }
+
+        
+
+        /**
+         * Создает анимированные иконки на фоне
+         */
+        function createSkulls() {
+            const container = document.getElementById('skulls-container');
+            if (!container) return;
+            const icons = ['💀', '⚓', '⚔️', '💰'];
+            const iconCount = 25; // Количество иконок
+
+            for (let i = 0; i < iconCount; i++) {
+                const iconElement = document.createElement('div');
+                iconElement.innerHTML = icons[Math.floor(Math.random() * icons.length)];
+                iconElement.className = 'skull'; // Используем тот же класс
+
+                // Случайные параметры для разнообразия
+                iconElement.style.left = `${Math.random() * 100}vw`;
+                iconElement.style.fontSize = `${1 + Math.random() * 2.5}rem`;
+                iconElement.style.animationDelay = `${Math.random() * 15}s`;
+                iconElement.style.animationDuration = `${10 + Math.random() * 10}s`; // Разная скорость
+
+                container.appendChild(iconElement);
+            }
+        }
+
+
+        // Инициализация приложения: загрузка основной страницы при старте
+        window.onload = () => {
+            loadState();
+            applyRoleUI();
+            initHolidayTheme();
+            navigate('main'); // Всегда начинаем с главной
+            createSkulls();
+        };
+
+        // ------------------------
+        // Новогодняя тема (переключаемая)
+        // ------------------------
+        function initHolidayTheme() {
+            const key = 'wosb_holiday_theme';
+            const btn = document.getElementById('holiday-toggle');
+            const saved = localStorage.getItem(key) === '1';
+            if (saved) enableHolidayTheme();
+            if (btn) {
+                updateHolidayBtn();
+                btn.addEventListener('click', () => {
+                    if (document.body.classList.contains('holiday-active')) {
+                        disableHolidayTheme();
+                        localStorage.setItem(key, '0');
+                    } else {
+                        enableHolidayTheme();
+                        localStorage.setItem(key, '1');
+                    }
+                    updateHolidayBtn();
+                });
+            }
+            // Countdown close
+            const closeBtn = document.getElementById('ny-close');
+            if (closeBtn) closeBtn.addEventListener('click', () => stopNYCountdown(true));
+
+            function updateHolidayBtn() {
+                if (!btn) return;
+                const on = document.body.classList.contains('holiday-active');
+                btn.textContent = on ? '❄️ Новый год: Вкл' : '❄️ Новый год';
+                btn.classList.toggle('border-cyan-300', on);
+            }
+        }
+
+        let nyTimer = null;
+
+        function enableHolidayTheme() {
+            document.body.classList.add('holiday-active');
+            ensureSnow();
+            addSnowCaps(true);
+            startNYCountdown();
+            createGifts();
+        }
+
+        function disableHolidayTheme() {
+            document.body.classList.remove('holiday-active');
+            const snow = document.getElementById('snow-overlay');
+            if (snow) snow.innerHTML = '';
+            addSnowCaps(false);
+            stopNYCountdown();
+            clearGifts();
+        }
+
+        function ensureSnow() {
+            const snow = document.getElementById('snow-overlay');
+            if (!snow) return;
+            if (snow.childElementCount > 0) return; // уже создано
+            const count = Math.min(90, Math.floor(window.innerWidth / 14));
+            for (let i = 0; i < count; i++) {
+                const s = document.createElement('span');
+                s.className = 'snowflake';
+                s.textContent = '❄';
+                const size = 4 + Math.random() * 6; // smaller flakes px
+                const left = Math.random() * 100; // vw
+                const duration = 10 + Math.random() * 14; // s (slightly longer)
+                const delay = -Math.random() * duration; // s (рассинхрон)
+                const swayDur = 2.5 + Math.random() * 2.5;
+                s.style.left = left + 'vw';
+                s.style.fontSize = size + 'px';
+                s.style.animationDuration = duration + 's, ' + swayDur + 's';
+                s.style.animationDelay = delay + 's, 0s';
+                s.style.opacity = (0.6 + Math.random() * 0.4).toFixed(2);
+                snow.appendChild(s);
+            }
+        }
+
+        function addSnowCaps(on) {
+            const targets = document.querySelectorAll('header nav button, button, .card-3d, .guide-nav-btn, .rounded-lg');
+            targets.forEach(el => {
+                if (on) el.classList.add('snow-cap'); else el.classList.remove('snow-cap');
+            });
+        }
+
+        function startNYCountdown() {
+            const holder = document.getElementById('ny-countdown');
+            const textEl = document.getElementById('ny-countdown-text');
+            if (!holder || !textEl) return;
+            holder.style.display = 'block';
+            const target = getNYTarget();
+            update();
+            if (nyTimer) clearInterval(nyTimer);
+            nyTimer = setInterval(update, 1000);
+
+            function update() {
+                const now = new Date();
+                let diff = target - now;
+                if (diff <= 0) {
+                    textEl.textContent = 'С Новым годом!';
+                    clearInterval(nyTimer); nyTimer = null;
+                    return;
+                }
+                const d = Math.floor(diff / (1000*60*60*24)); diff %= (1000*60*60*24);
+                const h = Math.floor(diff / (1000*60*60)); diff %= (1000*60*60);
+                const m = Math.floor(diff / (1000*60)); diff %= (1000*60);
+                const s = Math.floor(diff / 1000);
+                textEl.textContent = `${String(d).padStart(2,'0')}:${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+            }
+            function getNYTarget() {
+                const now = new Date();
+                const year = now.getMonth() === 0 && now.getDate() === 1 ? now.getFullYear() : now.getFullYear();
+                let target = new Date(year + 1, 0, 1, 0, 0, 0);
+                if (now < new Date(year, 0, 1, 0, 0, 0)) target = new Date(year, 0, 1, 0, 0, 0);
+                return target;
+            }
+        }
+
+        function stopNYCountdown(hideOnly = false) {
+            if (nyTimer) { clearInterval(nyTimer); nyTimer = null; }
+            if (hideOnly) document.getElementById('ny-countdown').style.display = 'none';
+        }
+
+        function createGifts() {
+            const holder = document.getElementById('holiday-gifts');
+            if (!holder) return;
+            if (holder.childElementCount) return;
+            const icons = ['🎁','🎀','🧧','🧦','🍬'];
+            const count = 4;
+            for (let i=0;i<count;i++) {
+                const el = document.createElement('span');
+                el.className = 'gift';
+                el.textContent = icons[i % icons.length];
+                el.style.left = `${10 + i*20 + Math.random()*10}%`;
+                el.style.transform = `rotate(${(Math.random()*20-10).toFixed(1)}deg)`;
+                holder.appendChild(el);
+            }
+        }
+        function clearGifts() {
+            const holder = document.getElementById('holiday-gifts');
+            if (holder) holder.innerHTML = '';
+        }
+
+        // Локальный снег для вкладки "Гайды"
+        function ensureGuideSnow() {
+            const container = document.getElementById('guide-content');
+            if (!container) return;
+            let layer = document.getElementById('guide-snow');
+            if (!layer) {
+                layer = document.createElement('div');
+                layer.id = 'guide-snow';
+                layer.className = 'section-snow';
+                container.appendChild(layer);
+            } else {
+                layer.innerHTML = '';
+            }
+            const width = container.clientWidth || window.innerWidth;
+            const count = Math.min(36, Math.max(18, Math.floor(width / 50)));
+            for (let i = 0; i < count; i++) {
+                const s = document.createElement('span');
+                s.className = 'flake';
+                s.textContent = '❄';
+                const size = 3 + Math.random() * 5; // 3-8px
+                const left = Math.random() * 100; // %
+                const duration = 10 + Math.random() * 12; // s
+                const delay = -Math.random() * duration;
+                const swayDur = 2 + Math.random() * 2.5;
+                s.style.left = left + '%';
+                s.style.fontSize = size + 'px';
+                s.style.animationDuration = duration + 's, ' + swayDur + 's';
+                s.style.animationDelay = delay + 's, 0s';
+                layer.appendChild(s);
+            }
+        }
+    </script>
+</body>
+</html>
